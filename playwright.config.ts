@@ -6,12 +6,12 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   use: {
-    baseURL: 'http://127.0.0.1:4321',
+    baseURL: 'http://127.0.0.1:4322',
     trace: 'on-first-retry',
   },
   webServer: {
-    command: 'npm run dev',
-    url: 'http://127.0.0.1:4321',
+    command: 'npx astro preview --host 127.0.0.1 --port 4322',
+    url: 'http://127.0.0.1:4322',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },

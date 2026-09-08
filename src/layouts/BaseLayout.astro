@@ -2,29 +2,65 @@
 import '../styles/global.css';
 import { profile } from '../data/profile';
 
+type JsonLd = Record<string, unknown>;
+
 type Props = {
   title?: string;
   description?: string;
+  noindex?: boolean;
+  ogType?: 'website' | 'article';
+  extraJsonLd?: JsonLd | JsonLd[];
 };
 
-const { title, description } = Astro.props;
+const {
+  title,
+  description,
+  noindex = false,
+  ogType = 'website',
+  extraJsonLd,
+} = Astro.props;
+
 const pageTitle = title ? `${title} · ${profile.name}` : `${profile.name} · ${profile.role}`;
 const pageDescription = description ?? profile.intro;
 const canonical = new URL(Astro.url.pathname, Astro.site);
+const siteUrl = Astro.site?.href ?? 'https://amhercosaine.dev/';
+const personId = `${new URL('/#person', Astro.site)}`;
+const websiteId = `${new URL('/#website', Astro.site)}`;
+const isHome = Astro.url.pathname === '/';
+const extraNodes = extraJsonLd ? (Array.isArray(extraJsonLd) ? extraJsonLd : [extraJsonLd]) : [];
+
 const jsonLd = {
   '@context': 'https://schema.org',
-  '@type': 'Person',
-  name: profile.name,
-  jobTitle: profile.role,
-  email: profile.email,
-  url: Astro.site,
-  sameAs: [profile.socials.github, profile.socials.linkedin],
-  address: {
-    '@type': 'PostalAddress',
-    addressLocality: 'Taguig',
-    addressCountry: 'PH',
-  },
+  '@graph': [
+    {
+      '@type': 'Person',
+      '@id': personId,
+      name: profile.name,
+      jobTitle: profile.role,
+      description: profile.about,
+      email: profile.email,
+      url: siteUrl,
+      sameAs: [profile.socials.github, profile.socials.linkedin],
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: 'Taguig',
+        addressCountry: 'PH',
+      },
+    },
+    {
+      '@type': 'WebSite',
+      '@id': websiteId,
+      name: `${profile.name} · ${profile.role}`,
+      url: siteUrl,
+      description: profile.intro,
+      inLanguage: 'en',
+      publisher: { '@id': personId },
+    },
+    ...extraNodes,
+  ],
 };
+
+const jsonLdScript = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
 ---
 
 <!doctype html>
@@ -35,36 +71,51 @@ const jsonLd = {
     <title>{pageTitle}</title>
     <meta name="description" content={pageDescription} />
     <meta name="author" content={profile.name} />
-    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    {!noindex && <link rel="canonical" href={canonical} />}
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={pageDescription} />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content={canonical} />
-    <meta name="twitter:card" content="summary_large_image" />
+    <meta property="og:type" content={ogType} />
+    {!noindex && <meta property="og:url" content={canonical} />}
+    <meta property="og:site_name" content={profile.name} />
+    <meta property="og:locale" content="en_PH" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={pageDescription} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+    <script is:inline type="application/ld+json" set:html={jsonLdScript} />
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
     <div class="site-frame">
-      <div class="console-bar">
-        <div class="shell">
-          <span class="status-live">{profile.availability}</span>
-          <span>{profile.location}</span>
+      <div class="site-chrome">
+        <div class="console-bar">
+          <div class="shell">
+            <span class="status-live">{profile.availability}</span>
+            <span>Taguig, PH · Remote</span>
+          </div>
         </div>
-      </div>
-      <header class="site-header">
+        <header class="site-header">
         <div class="shell header-inner">
-          <a class="brand" href="/">
+          <a class="brand" href="/" aria-current={isHome ? 'page' : undefined}>
             <span class="brand-mark">{profile.initials}</span>
             <span class="brand-name">{profile.shortName}</span>
             <span class="brand-role">{profile.role}</span>
           </a>
-          <input class="nav-toggle" id="nav-toggle" type="checkbox" />
-          <label class="menu-button" for="nav-toggle" aria-label="Toggle navigation">
+          <input class="nav-toggle" id="nav-toggle" type="checkbox" tabindex="-1" aria-hidden="true" />
+          <label
+            class="menu-button"
+            for="nav-toggle"
+            id="nav-menu-button"
+            role="button"
+            aria-label="Toggle navigation"
+            aria-controls="site-nav"
+            aria-expanded="false"
+            tabindex="0"
+          >
             <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 17h16"></path></svg>
           </label>
-          <nav class="nav-links" aria-label="Primary">
+          <nav class="nav-links" id="site-nav" aria-label="Primary">
             <a href="/#work">Work</a>
             <a href="/#approach">Approach</a>
             <a href="/#experience">Experience</a>
@@ -72,7 +123,8 @@ const jsonLd = {
           </nav>
         </div>
       </header>
-      <main id="main">
+      </div>
+      <main id="main" tabindex="-1">
         <slot />
       </main>
       <footer class="shell site-footer">
@@ -81,5 +133,44 @@ const jsonLd = {
         <a href="#main">Back to top</a>
       </footer>
     </div>
+    <script>
+      const toggle = document.getElementById('nav-toggle');
+      const button = document.getElementById('nav-menu-button');
+      const nav = document.getElementById('site-nav');
+
+      if (toggle instanceof HTMLInputElement && button instanceof HTMLElement) {
+        const syncExpanded = () => {
+          button.setAttribute('aria-expanded', String(toggle.checked));
+        };
+
+        syncExpanded();
+        toggle.addEventListener('change', syncExpanded);
+
+        button.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            toggle.checked = !toggle.checked;
+            toggle.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+        });
+
+        document.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && toggle.checked) {
+            toggle.checked = false;
+            toggle.dispatchEvent(new Event('change', { bubbles: true }));
+            button.focus();
+          }
+        });
+
+        nav?.querySelectorAll('a').forEach((link) => {
+          link.addEventListener('click', () => {
+            if (toggle.checked) {
+              toggle.checked = false;
+              toggle.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+          });
+        });
+      }
+    </script>
   </body>
 </html>

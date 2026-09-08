@@ -83,7 +83,6 @@ const projects = (await getCollection('projects')).sort((a, b) => a.data.order -
 
   <section class="shell section" id="work">
     <div class="section-heading">
-      <p class="section-path">/work</p>
       <h2>Architecture you can hire.</h2>
       <p>
         Case studies for .NET Developer, Software Engineer, and API Developer roles—greenfield SaaS,
@@ -122,7 +121,9 @@ const projects = (await getCollection('projects')).sort((a, b) => a.data.order -
             <div class="project-highlights">
               {project.data.highlights.map((item) => <span>{item}</span>)}
             </div>
-            <a href={`/work/${project.id}`}>Read the case study</a>
+            <a href={`/work/${project.id}`} aria-label={`Read the ${project.data.title} case study`}>
+              Read the case study
+            </a>
           </div>
         </article>
       ))}
@@ -131,7 +132,6 @@ const projects = (await getCollection('projects')).sort((a, b) => a.data.order -
 
   <section class="shell section" id="approach">
     <div class="section-heading">
-      <p class="section-path">/approach</p>
       <h2>Built for the next incident.</h2>
       <p>Good backend engineering is invisible when things go right—and invaluable when they do not.</p>
     </div>
@@ -153,12 +153,11 @@ const projects = (await getCollection('projects')).sort((a, b) => a.data.order -
 
   <section class="shell section experience-section" id="experience">
     <div>
-      <p class="section-path">/experience</p>
       <h2>Where I’ve shipped.</h2>
       <div class="timeline">
         {experience.map((item) => (
-          <article class="timeline-item">
-            <time>{item.period}</time>
+          <article class:list={['timeline-item', item.period.includes('Present') && 'current']}>
+            <time datetime={item.start}>{item.period}</time>
             <h3>{item.role}</h3>
             <span class="company">{item.company}</span>
             <p>{item.detail}</p>
@@ -170,13 +169,12 @@ const projects = (await getCollection('projects')).sort((a, b) => a.data.order -
       </p>
     </div>
     <div>
-      <p class="section-path">/toolkit</p>
       <h2>Tools with a job to do.</h2>
       <p class="toolkit-intro">I choose technology for maintainability, team fit, and operational clarity—not novelty.</p>
       <ul class="toolkit-list">
         {toolkit.map((tool, index) => (
           <li>
-            <i>{String(index + 1).padStart(2, '0')}</i>
+            <i aria-hidden="true">{String(index + 1).padStart(2, '0')}</i>
             {tool}
           </li>
         ))}
@@ -186,7 +184,6 @@ const projects = (await getCollection('projects')).sort((a, b) => a.data.order -
 
   <section class="shell section contact-section" id="contact">
     <div>
-      <p class="section-path">/contact</p>
       <h2>Need a .NET API you can trust?</h2>
       <p>
         I’m interested in thoughtful teams, hard systems problems, and products that have to keep
@@ -194,11 +191,19 @@ const projects = (await getCollection('projects')).sort((a, b) => a.data.order -
       </p>
     </div>
     <div class="contact-panel">
-      <a class="contact-email" href={`mailto:${profile.email}`}>{profile.email}</a>
-      <div class="social-links">
-        <a href={profile.socials.github} target="_blank" rel="noreferrer">GitHub</a>
-        <a href={profile.socials.linkedin} target="_blank" rel="noreferrer">LinkedIn</a>
+      <div class="contact-row">
+        <span>Email</span>
+        <a class="contact-email" href={`mailto:${profile.email}`}>{profile.email}</a>
       </div>
+      <div class="contact-row">
+        <span>GitHub</span>
+        <a href={profile.socials.github} target="_blank" rel="noopener noreferrer" aria-label="GitHub (opens in a new tab)">amhercos</a>
+      </div>
+      <div class="contact-row">
+        <span>LinkedIn</span>
+        <a href={profile.socials.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn (opens in a new tab)">amhercosaine</a>
+      </div>
+      <CopyEmailButton client:load />
     </div>
   </section>
 </BaseLayout>

@@ -2,9 +2,13 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
-<BaseLayout title="Page not found" description="This route is not part of the portfolio.">
+<BaseLayout
+  title="Page not found"
+  description="This route is not part of the portfolio."
+  noindex
+>
   <section class="shell not-found">
-    <p class="section-path">HTTP 404</p>
+    <p class="status-ok">HTTP 404</p>
     <h1>This endpoint does not exist.</h1>
     <p>The system is healthy. The URL is not.</p>
     <a class="button button-primary" href="/">Return home</a>

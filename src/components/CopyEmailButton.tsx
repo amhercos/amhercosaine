@@ -1,14 +1,20 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { profile } from '../data/profile';
 
 export default function CopyEmailButton() {
   const [copied, setCopied] = useState(false);
+  const timeoutRef = useRef<number | undefined>(undefined);
+
+  useEffect(() => {
+    return () => window.clearTimeout(timeoutRef.current);
+  }, []);
 
   const copyEmail = async () => {
     try {
       await navigator.clipboard.writeText(profile.email);
       setCopied(true);
-      window.setTimeout(() => setCopied(false), 1800);
+      window.clearTimeout(timeoutRef.current);
+      timeoutRef.current = window.setTimeout(() => setCopied(false), 1800);
     } catch {
       window.location.href = `mailto:${profile.email}`;
     }
@@ -19,6 +25,7 @@ export default function CopyEmailButton() {
       className="button button-secondary"
       type="button"
       onClick={copyEmail}
+      aria-label={copied ? 'Email address copied' : `Copy email address ${profile.email}`}
       aria-live="polite"
     >
       <svg className="icon" viewBox="0 0 24 24" aria-hidden="true">

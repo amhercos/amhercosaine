@@ -2,7 +2,7 @@
 
 Standalone Astro site for hiring-manager review. Target roles: **.NET Developer**, **Software Engineer**, **API Developer**.
 
-The current employer is kept anonymous. There is no phone number and no résumé PDF on this site.
+The current employer is kept anonymous. There is no phone number. The résumé lives at `/resume` with a PDF download.
 
 ## Preview locally
 
@@ -23,12 +23,13 @@ Then open [http://localhost:4321](http://localhost:4321).
 | `npm run check` | TypeScript / Astro diagnostics |
 | `npm run build` | `astro check` then production static build into `./dist/` |
 | `npm run preview` | Serve the production build locally |
-| `npm test` | Playwright smokes (homepage, case studies, contact email, 404) |
+| `npm test` | Playwright smokes (homepage, case studies, résumé, contact, 404) |
 
 ## What is on the site
 
 - Homepage: profile, selected systems, approach, experience, toolkit, contact
 - Case studies at `/work/bizflow`, `/work/legacy-saas-modernization`, `/work/amsentry`, `/work/readtounlock`
+- Résumé: [View](/resume) and [Download PDF](/AmherCosaine-Timpahan-Resume.pdf)
 - Contact: [amhercosainetimpahan@gmail.com](mailto:amhercosainetimpahan@gmail.com), plus GitHub and LinkedIn
 
 ## Notes

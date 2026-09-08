@@ -10,12 +10,13 @@ import {
   proofPoints,
   toolkit,
 } from '../data/profile';
+import { resumePdfFilename, resumePdfHref } from '../data/resume';
 
 const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
 ---
 
 <BaseLayout>
-  <section class="shell hero" data-reveal>
+  <section class="shell hero">
 
     <div>
       <h1>{profile.headline}</h1>
@@ -31,7 +32,7 @@ const projects = (await getCollection('projects')).sort((a, b) => a.data.order -
 
     <aside class="system-card" aria-label="Reference architecture for a reliable .NET backend">
       <div class="system-card-header">
-        <span class="sys-proc">svc / reference.topology</span>
+        <span class="sys-proc">Reference backend</span>
         <span>Clean Architecture</span>
       </div>
       <div class="system-map">
@@ -68,7 +69,7 @@ const projects = (await getCollection('projects')).sort((a, b) => a.data.order -
       </div>
       <div class="system-footer">
         <span class="status-ok">Boundaries held</span>
-        <span>illustrative topology</span>
+        <span>example layout</span>
       </div>
     </aside>
   </section>
@@ -217,6 +218,13 @@ const projects = (await getCollection('projects')).sort((a, b) => a.data.order -
       <div class="contact-row">
         <span>LinkedIn</span>
         <a href={profile.socials.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn (opens in a new tab)">amhercosaine</a>
+      </div>
+      <div class="contact-row">
+        <span>Résumé</span>
+        <div class="contact-resume-links">
+          <a href="/resume">View résumé</a>
+          <a href={resumePdfHref} download={resumePdfFilename}>Download PDF</a>
+        </div>
       </div>
       <CopyEmailButton client:load />
     </div>

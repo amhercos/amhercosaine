@@ -39,3 +39,37 @@ test('unknown routes render the 404 page', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 1 })).toContainText('does not exist');
   await expect(page.getByRole('link', { name: 'Return home' })).toHaveAttribute('href', '/');
 });
+
+test('resume page renders view and download controls', async ({ page, request }) => {
+  const response = await page.goto('/resume');
+  expect(response?.ok()).toBeTruthy();
+
+  await expect(page.getByRole('heading', { level: 1 })).toContainText(profile.name);
+  await expect(page.getByRole('navigation', { name: 'Primary' }).getByRole('link', { name: 'Résumé' })).toHaveAttribute(
+    'href',
+    '/resume',
+  );
+
+  const downloadLink = page.getByRole('link', { name: 'Download PDF' }).first();
+  await expect(downloadLink).toHaveAttribute('href', '/AmherCosaine-Timpahan-Resume.pdf');
+  await expect(downloadLink).toHaveAttribute('download', 'AmherCosaine-Timpahan-Resume.pdf');
+
+  const pdf = await request.get('/AmherCosaine-Timpahan-Resume.pdf');
+  expect(pdf.ok()).toBeTruthy();
+  expect(pdf.headers()['content-type'] ?? '').toMatch(/pdf/i);
+});
+
+test('contact offers résumé view and pdf download', async ({ page }) => {
+  await page.goto('/');
+
+  const resumeRow = page.locator('#contact .contact-row', { hasText: 'Résumé' });
+  await expect(resumeRow.getByRole('link', { name: 'View résumé' })).toHaveAttribute('href', '/resume');
+  await expect(resumeRow.getByRole('link', { name: 'Download PDF' })).toHaveAttribute(
+    'href',
+    '/AmherCosaine-Timpahan-Resume.pdf',
+  );
+  await expect(resumeRow.getByRole('link', { name: 'Download PDF' })).toHaveAttribute(
+    'download',
+    'AmherCosaine-Timpahan-Resume.pdf',
+  );
+});

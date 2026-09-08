@@ -46,7 +46,7 @@ Use **code-reviewer** before each checkpoint, then **diligent-dev** to commit th
 | --- | --- | --- |
 | S4-1 | `astro check` + `npm run build` | done |
 | S4-2 | Playwright smokes (home, work routes, 404, email) | done |
-| S4-3 | Replace starter README with real run/preview notes | todo |
+| S4-3 | Replace starter README with real run/preview notes | done |
 | S4-4 | Reviewer-approved commit cadence per finished task | in progress |
 
 ## Rules

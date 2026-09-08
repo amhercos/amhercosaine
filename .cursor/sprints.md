@@ -12,7 +12,7 @@ Use **code-reviewer** before each checkpoint, then **diligent-dev** to commit th
 | S1-1 | Astro + TypeScript project in `C:\Working Directory\dotnet-portfolio` | done |
 | S1-2 | `git init -b main` in this folder only | done |
 | S1-3 | Project agents: `code-reviewer`, `diligent-dev` | done |
-| S1-4 | First commit of the site + agents + this board | in progress |
+| S1-4 | First commit of the site + agents + this board | done |
 
 ## Sprint 2 — Proof
 

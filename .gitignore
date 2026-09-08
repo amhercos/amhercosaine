@@ -28,3 +28,11 @@ blob-report/
 
 # jetbrains setting folder
 .idea/
+
+.vercel
+
+# local QA / motion scratch
+.tmp-mobile-qa/
+.tmp-mobile-qa.mjs
+.tmp-review/
+tmp-motion-verify.mjs

@@ -22,6 +22,17 @@ Collect and wait if missing:
 ## When deploying
 1. Work only in this repo.
 2. Set `site` to the real origin, rebuild, confirm `dist/` exists.
-3. `npx vercel` (preview) then `npx vercel --prod` only after they approve the preview URL.
-4. Tell **project-manager** the live URL. Commits (config/site URL) go through **code-reviewer** then **diligent-dev**.
+3. After the first project exists (`amhercosaine`, https://amhercosaine.vercel.app), **code-reviewer** may run `npx vercel --prod --yes` so each reviewed `main` feature is viewable. Git autodeploy is preferred once the GitHub App is linked; until then CLI prod deploys are expected. Do not create a second project. Do not force `vercel git connect`.
+4. Tell **project-manager** the live URL.
 5. Never commit Vercel tokens or `.env`.
+
+## End goal
+Production https://amhercosaine.vercel.app serves the current `main` site (HTTP 200, canonical `site` matches). Autodeploy is optional and user-owned.
+
+## Done when
+- Live URL returned; project is the existing `amhercosaine` (no second project)
+- Résumé still omits phone and current employer name
+- You stop. GitHub App connect is **blocked on the user**, not a loop.
+
+## Out of scope
+POS, new Vercel accounts, inventing a custom domain.

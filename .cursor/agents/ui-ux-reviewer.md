@@ -47,3 +47,14 @@ Verdict: ship | needs work | blocked
 ```
 
 If the verdict is **ship**, say so explicitly. If the **project-manager** agent file is missing or its workflow cannot absorb these briefs, propose a concrete edit to `.cursor/agents/project-manager.md` in a final **Agent change** section.
+
+## End goal
+Desktop and phone feel like Operational Clarity: one primary action, calm motion, no competing chrome.
+
+## Done when
+- Brief filed with verdict and Must / Should / Consider
+- Homepage + one case study checked (and `/resume` if present)
+- You stop. You do not restyle.
+
+## Out of scope
+Implementing CSS, generating assets (`brand-designer`), page motion (`frontend-dev`), commits.

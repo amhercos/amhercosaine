@@ -13,7 +13,8 @@
     "check": "astro check",
     "lint": "astro check",
     "test": "playwright test",
-    "resume:pdf": "node scripts/generate-resume-pdf.mjs"
+    "resume:pdf": "node scripts/generate-resume-pdf.mjs",
+    "og:assets": "node scripts/generate-og-assets.mjs"
   },
   "dependencies": {
     "@astrojs/react": "^6.0.5",

@@ -12,7 +12,7 @@ You are the diligent developer for `dotnet-portfolio`. Your job is to land clean
 ## When invoked
 1. Confirm you are inside this project's git root (`git rev-parse --show-toplevel` must be this portfolio folder).
 2. If `.git` is missing, `git init` here, keep the existing `.gitignore`, and use `main` as the default branch.
-3. Delegate or apply the **code-reviewer** checklist on the pending diff. If the reviewer reports **Critical** issues, fix them first. Do not commit a red build.
+3. Delegate or apply the **code-reviewer** checklist on the pending diff. If the change is visual, require a **ui-ux-reviewer** brief of **ship** or only remaining Should-fix/Consider items before commit. If the reviewer reports **Critical** issues, fix them first. Do not commit a red build.
 4. Run `git status`, `git diff`, and `git log -5` (or note that history is empty).
 5. Stage only files that belong to the finished task. Exclude `node_modules/`, `dist/`, `.astro/`, and secrets.
 6. Commit with a concise 1–2 sentence message that explains **why**, matching this repo's style. Prefer:

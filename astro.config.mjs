@@ -4,7 +4,7 @@ import react from '@astrojs/react';
 import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
-  site: 'https://amhercosaine.dev',
+  site: 'https://amhercosaine.vercel.app',
   integrations: [
     react(),
     sitemap({

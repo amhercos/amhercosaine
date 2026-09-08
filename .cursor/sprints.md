@@ -1,7 +1,7 @@
 # Portfolio sprints
 
 Source of truth for `dotnet-portfolio` only. Do not track POS/BizFlow here.
-Use **code-reviewer** before each checkpoint, then **diligent-dev** to commit that sprint’s completed tasks.
+Use **ui-ux-reviewer** for layout/motion briefs (filed to **project-manager**), **code-reviewer** before each checkpoint, then **diligent-dev** to commit that sprint’s completed tasks.
 
 ## Sprint 1 — Foundation
 
@@ -11,7 +11,7 @@ Use **code-reviewer** before each checkpoint, then **diligent-dev** to commit th
 | --- | --- | --- |
 | S1-1 | Astro + TypeScript project in `C:\Working Directory\dotnet-portfolio` | done |
 | S1-2 | `git init -b main` in this folder only | done |
-| S1-3 | Project agents: `code-reviewer`, `diligent-dev` | done |
+| S1-3 | Project agents: `code-reviewer`, `diligent-dev`, `ui-ux-reviewer`, `project-manager` | done |
 | S1-4 | First commit of the site + agents + this board | done |
 
 ## Sprint 2 — Proof

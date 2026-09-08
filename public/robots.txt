@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://amhercosaine.dev/sitemap-index.xml
+Sitemap: https://amhercosaine.vercel.app/sitemap-index.xml

@@ -1,4 +1,5 @@
 ---
+import { ClientRouter } from 'astro:transitions';
 import '../styles/global.css';
 import { profile } from '../data/profile';
 
@@ -23,7 +24,7 @@ const {
 const pageTitle = title ? `${title} · ${profile.name}` : `${profile.name} · ${profile.role}`;
 const pageDescription = description ?? profile.intro;
 const canonical = new URL(Astro.url.pathname, Astro.site);
-const siteUrl = Astro.site?.href ?? 'https://amhercosaine.dev/';
+const siteUrl = Astro.site?.href ?? 'https://amhercosaine.vercel.app/';
 const personId = `${new URL('/#person', Astro.site)}`;
 const websiteId = `${new URL('/#website', Astro.site)}`;
 const isHome = Astro.url.pathname === '/';
@@ -83,12 +84,18 @@ const jsonLdScript = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
     <meta name="twitter:title" content={pageTitle} />
     <meta name="twitter:description" content={pageDescription} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <ClientRouter />
+    <script is:inline>
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.documentElement.classList.add('motion-ready');
+      }
+    </script>
     <script is:inline type="application/ld+json" set:html={jsonLdScript} />
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
     <div class="site-frame">
-      <div class="site-chrome">
+      <div class="site-chrome" transition:persist="chrome">
         <div class="console-bar">
           <div class="shell">
             <span class="status-live">{profile.availability}</span>
@@ -134,11 +141,19 @@ const jsonLdScript = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
       </footer>
     </div>
     <script>
-      const toggle = document.getElementById('nav-toggle');
-      const button = document.getElementById('nav-menu-button');
-      const nav = document.getElementById('site-nav');
+      const motionOk = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const chrome = document.querySelector('.site-chrome');
+      const sectionIds = ['work', 'approach', 'experience', 'contact'];
+      let ticking = false;
 
-      if (toggle instanceof HTMLInputElement && button instanceof HTMLElement) {
+      const bindNav = () => {
+        const toggle = document.getElementById('nav-toggle');
+        const button = document.getElementById('nav-menu-button');
+        const nav = document.getElementById('site-nav');
+        if (!(toggle instanceof HTMLInputElement) || !(button instanceof HTMLElement)) return;
+        if (button.dataset.bound === 'true') return;
+        button.dataset.bound = 'true';
+
         const syncExpanded = () => {
           button.setAttribute('aria-expanded', String(toggle.checked));
         };
@@ -170,7 +185,68 @@ const jsonLdScript = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
             }
           });
         });
-      }
+      };
+
+      const reveal = () => {
+        const nodes = document.querySelectorAll('[data-reveal]:not(.is-in)');
+        if (!motionOk) {
+          nodes.forEach((node) => node.classList.add('is-in'));
+          return;
+        }
+        const observer = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (!entry.isIntersecting) continue;
+              entry.target.classList.add('is-in');
+              observer.unobserve(entry.target);
+            }
+          },
+          { threshold: 0.14, rootMargin: '0px 0px -6% 0px' },
+        );
+        nodes.forEach((node) => observer.observe(node));
+      };
+
+      const syncChrome = () => {
+        chrome?.classList.toggle('is-scrolled', window.scrollY > 10);
+      };
+
+      const syncNav = () => {
+        const links = document.querySelectorAll('.nav-links a[href*="#"]');
+        const y = window.scrollY + 128;
+        let current = '';
+        for (const id of sectionIds) {
+          const section = document.getElementById(id);
+          if (section && section.offsetTop <= y) current = id;
+        }
+        links.forEach((link) => {
+          const href = link.getAttribute('href') ?? '';
+          const id = href.split('#')[1];
+          link.toggleAttribute('data-active', Boolean(current && id === current));
+        });
+      };
+
+      const boot = () => {
+        bindNav();
+        reveal();
+        syncChrome();
+        syncNav();
+      };
+
+      document.addEventListener('astro:page-load', boot);
+      boot();
+      window.addEventListener(
+        'scroll',
+        () => {
+          if (ticking) return;
+          ticking = true;
+          requestAnimationFrame(() => {
+            syncChrome();
+            syncNav();
+            ticking = false;
+          });
+        },
+        { passive: true },
+      );
     </script>
   </body>
 </html>

@@ -4,7 +4,7 @@ export const profile = {
   initials: 'AC',
   role: '.NET Developer',
   targetRoles: ['.NET Developer', 'Software Engineer', 'API Developer'],
-  headline: 'I build .NET APIs that stay boring in production.',
+  headline: 'I build .NET APIs that keep production boring.',
   intro:
     'I turn complex business rules into clean, testable services—whether the work is a new SaaS platform, a hardware-to-cloud bridge, or a legacy system that needs a modern home.',
   location: 'Taguig, Philippines · Open to remote',
@@ -61,6 +61,16 @@ export const experience = [
       'Modernizing a legacy SaaS product into a .NET 10 Web API with Clean Architecture, vertical feature slices, and production-grade validation, auth, and data access. Employer details remain private.',
   },
   {
+    period: 'Mar 2026 — Present',
+    start: '2026-03',
+    role: 'Freelance Full-Stack Developer',
+    company: 'BizFlow POS & Inventory',
+    engagement: 'Freelance',
+    href: '/work/bizflow',
+    detail:
+      'Built a multi-tenant point-of-sale and inventory SaaS: Clean Architecture .NET API, schema-per-tenant data isolation, promotions and credit flows, and a React Native client for the floor.',
+  },
+  {
     period: 'Jun 2025 — Mar 2026',
     start: '2025-06',
     role: 'Backend Developer Intern',
@@ -73,6 +83,8 @@ export const experience = [
     start: '2025-07',
     role: 'Freelance Developer',
     company: 'ReadToUnlock',
+    engagement: 'Freelance',
+    href: '/work/readtounlock',
     detail:
       'Shipped a React reading-comprehension product with progress-gated unlock logic designed to keep students moving through assigned work.',
   },

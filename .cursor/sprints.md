@@ -36,7 +36,7 @@ Use **code-reviewer** before each checkpoint, then **diligent-dev** to commit th
 | S3-1 | Design tokens, type, grid, system map | done |
 | S3-2 | Impeccable visual pass (hero, cards, case studies) | done |
 | S3-3 | Mobile nav, contrast, reduced motion, focus | done |
-| S3-4 | Browser visual QA on homepage + one case study | todo |
+| S3-4 | Browser visual QA on homepage + one case study | done |
 
 ## Sprint 4 — Ship
 

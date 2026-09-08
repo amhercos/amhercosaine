@@ -37,8 +37,10 @@ const extraJsonLd = {
   extraJsonLd={extraJsonLd}
 >
   <article class="shell case-hero">
-    <a class="case-back" href="/#work">All systems</a>
-    <p class="section-path">/work/{project.id}</p>
+    <div class="case-nav">
+      <a class="case-back" href="/#work">All systems</a>
+      <p class="section-path">/work/{project.id}</p>
+    </div>
     <h1>{project.data.title}</h1>
     <p class="hero-intro">{project.data.summary}</p>
     <div class="case-meta">

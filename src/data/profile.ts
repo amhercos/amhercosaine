@@ -76,7 +76,7 @@ export const experience = [
     role: 'Backend Developer Intern',
     company: "St. Vincent's College Incorporated",
     detail:
-      'Built college-wide backend services and a biometric middleware bridge that synchronized fingerprint devices with a central attendance platform.',
+      'Built the AMSentry attendance API and a C# WinForms middleware bridge that synchronized ZKTeco fingerprint devices with a central attendance platform.',
   },
   {
     period: 'Jul 2025 — Aug 2025',

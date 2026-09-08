@@ -25,9 +25,11 @@ const pageTitle = title ? `${title} · ${profile.name}` : `${profile.name} · ${
 const pageDescription = description ?? profile.intro;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const siteUrl = Astro.site?.href ?? 'https://amhercosaine.vercel.app/';
+const ogImage = new URL('/og-image.png', Astro.site ?? 'https://amhercosaine.vercel.app/');
 const personId = `${new URL('/#person', Astro.site)}`;
 const websiteId = `${new URL('/#website', Astro.site)}`;
 const isHome = Astro.url.pathname === '/';
+const isResume = Astro.url.pathname === '/resume';
 const extraNodes = extraJsonLd ? (Array.isArray(extraJsonLd) ? extraJsonLd : [extraJsonLd]) : [];
 
 const jsonLd = {
@@ -80,19 +82,32 @@ const jsonLdScript = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
     {!noindex && <meta property="og:url" content={canonical} />}
     <meta property="og:site_name" content={profile.name} />
     <meta property="og:locale" content="en_PH" />
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:alt" content={`${profile.name} — ${profile.headline}`} />
+    <meta property="og:image:width" content="1536" />
+    <meta property="og:image:height" content="1024" />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={pageTitle} />
     <meta name="twitter:description" content={pageDescription} />
+    <meta name="twitter:image" content={ogImage} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <ClientRouter />
     <script is:inline>
-      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        document.documentElement.classList.add('motion-ready');
-      }
+      (() => {
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.documentElement.classList.add('motion-ready');
+        }
+        window.setTimeout(() => {
+          if (!document.documentElement.hasAttribute('data-motion-boot')) {
+            document.documentElement.classList.add('motion-fallback');
+          }
+        }, 900);
+      })();
     </script>
     <script is:inline type="application/ld+json" set:html={jsonLdScript} />
   </head>
-  <body>
+  <body class:list={[isResume && 'page-resume']}>
     <a class="skip-link" href="#main">Skip to content</a>
     <div class="site-frame">
       <div class="site-chrome" transition:persist="chrome">
@@ -126,6 +141,7 @@ const jsonLdScript = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
             <a href="/#work">Work</a>
             <a href="/#approach">Approach</a>
             <a href="/#experience">Experience</a>
+            <a href="/resume" aria-current={isResume ? 'page' : undefined}>Résumé</a>
             <a class="nav-cta" href="/#contact">Contact</a>
           </nav>
         </div>
@@ -142,7 +158,6 @@ const jsonLdScript = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
     </div>
     <script>
       const motionOk = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const chrome = document.querySelector('.site-chrome');
       const sectionIds = ['work', 'approach', 'experience', 'contact'];
       let ticking = false;
 
@@ -188,6 +203,7 @@ const jsonLdScript = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
       };
 
       const reveal = () => {
+        document.documentElement.setAttribute('data-motion-boot', '');
         const nodes = document.querySelectorAll('[data-reveal]:not(.is-in)');
         if (!motionOk) {
           nodes.forEach((node) => node.classList.add('is-in'));
@@ -201,13 +217,13 @@ const jsonLdScript = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
               observer.unobserve(entry.target);
             }
           },
-          { threshold: 0.14, rootMargin: '0px 0px -6% 0px' },
+          { threshold: 0, rootMargin: '0px 0px -10% 0px' },
         );
         nodes.forEach((node) => observer.observe(node));
       };
 
       const syncChrome = () => {
-        chrome?.classList.toggle('is-scrolled', window.scrollY > 10);
+        document.querySelector('.site-chrome')?.classList.toggle('is-scrolled', window.scrollY > 10);
       };
 
       const syncNav = () => {
@@ -225,28 +241,71 @@ const jsonLdScript = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
         });
       };
 
+      const syncPageCurrent = () => {
+        const resumeLink = document.querySelector('.nav-links a[href="/resume"]');
+        if (resumeLink instanceof HTMLAnchorElement) {
+          if (location.pathname === '/resume') resumeLink.setAttribute('aria-current', 'page');
+          else resumeLink.removeAttribute('aria-current');
+        }
+        const brand = document.querySelector('.brand');
+        if (brand instanceof HTMLAnchorElement) {
+          if (location.pathname === '/') brand.setAttribute('aria-current', 'page');
+          else brand.removeAttribute('aria-current');
+        }
+
+        const toggle = document.getElementById('nav-toggle');
+        const button = document.getElementById('nav-menu-button');
+        if (toggle instanceof HTMLInputElement && toggle.checked) {
+          toggle.checked = false;
+          toggle.dispatchEvent(new Event('change', { bubbles: true }));
+          button?.setAttribute('aria-expanded', 'false');
+        }
+      };
+
+      const scrollToHash = () => {
+        let id = '';
+        try {
+          id = decodeURIComponent(window.location.hash.replace('#', ''));
+        } catch {
+          return;
+        }
+        if (!id) return;
+        const target = document.getElementById(id);
+        if (!(target instanceof HTMLElement)) return;
+        const behavior = motionOk ? 'smooth' : 'auto';
+        requestAnimationFrame(() => {
+          target.scrollIntoView({ block: 'start', behavior });
+        });
+      };
+
       const boot = () => {
         bindNav();
         reveal();
         syncChrome();
         syncNav();
+        syncPageCurrent();
+        scrollToHash();
       };
 
       document.addEventListener('astro:page-load', boot);
       boot();
-      window.addEventListener(
-        'scroll',
-        () => {
-          if (ticking) return;
-          ticking = true;
-          requestAnimationFrame(() => {
-            syncChrome();
-            syncNav();
-            ticking = false;
-          });
-        },
-        { passive: true },
-      );
+
+      if (!document.documentElement.hasAttribute('data-scroll-bound')) {
+        document.documentElement.setAttribute('data-scroll-bound', '');
+        window.addEventListener(
+          'scroll',
+          () => {
+            if (ticking) return;
+            ticking = true;
+            requestAnimationFrame(() => {
+              syncChrome();
+              syncNav();
+              ticking = false;
+            });
+          },
+          { passive: true },
+        );
+      }
     </script>
   </body>
 </html>

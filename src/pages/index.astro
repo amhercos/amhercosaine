@@ -1,0 +1,204 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CopyEmailButton from '../components/CopyEmailButton.tsx';
+import {
+  capabilities,
+  education,
+  experience,
+  profile,
+  proofPoints,
+  toolkit,
+} from '../data/profile';
+
+const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+---
+
+<BaseLayout>
+  <section class="shell hero">
+    <div>
+      <h1>{profile.headline}</h1>
+      <p class="hero-intro">{profile.intro}</p>
+      <div class="hero-actions">
+        <a class="button button-primary" href="#work">
+          Explore my work
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+        </a>
+        <CopyEmailButton client:load />
+      </div>
+    </div>
+
+    <aside class="system-card" aria-label="Reference architecture for a reliable .NET backend">
+      <div class="system-card-header">
+        <span class="sys-proc">svc / reference.topology</span>
+        <span>Clean Architecture</span>
+      </div>
+      <div class="system-map">
+        <div class="sys-row">
+          <span class="sys-lane">clients</span>
+          <div class="sys-nodes">
+            <div class="system-node"><span>Surface</span><strong>Web · Mobile</strong></div>
+          </div>
+        </div>
+        <div class="sys-row">
+          <span class="sys-lane">edge</span>
+          <div class="sys-nodes">
+            <div class="system-node accent">
+              <span>API</span>
+              <strong>ASP.NET Core</strong>
+              <small class="status-ok">healthy contract</small>
+            </div>
+          </div>
+        </div>
+        <div class="sys-row">
+          <span class="sys-lane">core</span>
+          <div class="sys-nodes split">
+            <div class="system-node"><span>Domain</span><strong>Business rules</strong><small>not in controllers</small></div>
+            <div class="system-node"><span>Data</span><strong>PostgreSQL</strong><small>isolated stores</small></div>
+          </div>
+        </div>
+        <div class="sys-row">
+          <span class="sys-lane">ops</span>
+          <div class="sys-nodes split">
+            <div class="system-node"><span>Quality</span><strong>Validation</strong></div>
+            <div class="system-node"><span>Observe</span><strong>Logs · Auth</strong></div>
+          </div>
+        </div>
+      </div>
+      <div class="system-footer">
+        <span class="status-ok">Boundaries held</span>
+        <span>illustrative topology</span>
+      </div>
+    </aside>
+  </section>
+
+  <section class="shell proof-strip" aria-label="Core expertise">
+    {proofPoints.map((point) => (
+      <div class="proof-item">
+        <strong>{point.value}</strong>
+        <span>{point.label}</span>
+      </div>
+    ))}
+  </section>
+
+  <section class="shell section" id="work">
+    <div class="section-heading">
+      <p class="section-path">/work</p>
+      <h2>Architecture you can hire.</h2>
+      <p>
+        Case studies for .NET Developer, Software Engineer, and API Developer roles—greenfield SaaS,
+        legacy modernization, and hardware-to-cloud work.
+      </p>
+    </div>
+    <div class="project-list">
+      {projects.map((project, index) => (
+        <article class:list={['project-card', project.data.featured && 'featured']}>
+          <div class="project-topline">
+            <span class="project-index">{String(index + 1).padStart(2, '0')}</span>
+            <span>{project.data.type}</span>
+            {project.data.featured && <span class="featured-label">Featured build</span>}
+            {project.data.confidential && <span class="confidential-label">Confidential</span>}
+          </div>
+          <div class="project-layout">
+            <div>
+              <h3>{project.data.title}</h3>
+              <p>{project.data.summary}</p>
+              <div class="project-stack">
+                {project.data.stack.map((item) => <span>{item}</span>)}
+              </div>
+            </div>
+            <div class="project-details">
+              <div>
+                <span class="detail-label">Constraint</span>
+                <p>{project.data.challenge}</p>
+              </div>
+              <div>
+                <span class="detail-label">Engineering response</span>
+                <p>{project.data.solution}</p>
+              </div>
+            </div>
+          </div>
+          <div class="project-footer">
+            <div class="project-highlights">
+              {project.data.highlights.map((item) => <span>{item}</span>)}
+            </div>
+            <a href={`/work/${project.id}`}>Read the case study</a>
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="shell section" id="approach">
+    <div class="section-heading">
+      <p class="section-path">/approach</p>
+      <h2>Built for the next incident.</h2>
+      <p>Good backend engineering is invisible when things go right—and invaluable when they do not.</p>
+    </div>
+    <div class="capability-list">
+      {capabilities.map((capability) => (
+        <article class="capability-row">
+          <p class="capability-number">{capability.number}</p>
+          <div>
+            <h3>{capability.title}</h3>
+            <div class="tag-row">
+              {capability.tags.map((tag) => <span>{tag}</span>)}
+            </div>
+          </div>
+          <p>{capability.description}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="shell section experience-section" id="experience">
+    <div>
+      <p class="section-path">/experience</p>
+      <h2>Where I’ve shipped.</h2>
+      <div class="timeline">
+        {experience.map((item) => (
+          <article class="timeline-item">
+            <time>{item.period}</time>
+            <h3>{item.role}</h3>
+            <span class="company">{item.company}</span>
+            <p>{item.detail}</p>
+          </article>
+        ))}
+      </div>
+      <p class="education-note">
+        {education.degree} · {education.school} · {education.period}
+      </p>
+    </div>
+    <div>
+      <p class="section-path">/toolkit</p>
+      <h2>Tools with a job to do.</h2>
+      <p class="toolkit-intro">I choose technology for maintainability, team fit, and operational clarity—not novelty.</p>
+      <ul class="toolkit-list">
+        {toolkit.map((tool, index) => (
+          <li>
+            <i>{String(index + 1).padStart(2, '0')}</i>
+            {tool}
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="shell section contact-section" id="contact">
+    <div>
+      <p class="section-path">/contact</p>
+      <h2>Need a .NET API you can trust?</h2>
+      <p>
+        I’m interested in thoughtful teams, hard systems problems, and products that have to keep
+        running. Target roles: {profile.targetRoles.join(', ')}.
+      </p>
+    </div>
+    <div class="contact-panel">
+      <a class="contact-email" href={`mailto:${profile.email}`}>{profile.email}</a>
+      <div class="social-links">
+        <a href={profile.socials.github} target="_blank" rel="noreferrer">GitHub</a>
+        <a href={profile.socials.linkedin} target="_blank" rel="noreferrer">LinkedIn</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

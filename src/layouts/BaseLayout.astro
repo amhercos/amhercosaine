@@ -1,0 +1,85 @@
+---
+import '../styles/global.css';
+import { profile } from '../data/profile';
+
+type Props = {
+  title?: string;
+  description?: string;
+};
+
+const { title, description } = Astro.props;
+const pageTitle = title ? `${title} · ${profile.name}` : `${profile.name} · ${profile.role}`;
+const pageDescription = description ?? profile.intro;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: profile.name,
+  jobTitle: profile.role,
+  email: profile.email,
+  url: Astro.site,
+  sameAs: [profile.socials.github, profile.socials.linkedin],
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Taguig',
+    addressCountry: 'PH',
+  },
+};
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={pageDescription} />
+    <meta name="author" content={profile.name} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div class="site-frame">
+      <div class="console-bar">
+        <div class="shell">
+          <span class="status-live">{profile.availability}</span>
+          <span>{profile.location}</span>
+        </div>
+      </div>
+      <header class="site-header">
+        <div class="shell header-inner">
+          <a class="brand" href="/">
+            <span class="brand-mark">{profile.initials}</span>
+            <span class="brand-name">{profile.shortName}</span>
+            <span class="brand-role">{profile.role}</span>
+          </a>
+          <input class="nav-toggle" id="nav-toggle" type="checkbox" />
+          <label class="menu-button" for="nav-toggle" aria-label="Toggle navigation">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 17h16"></path></svg>
+          </label>
+          <nav class="nav-links" aria-label="Primary">
+            <a href="/#work">Work</a>
+            <a href="/#approach">Approach</a>
+            <a href="/#experience">Experience</a>
+            <a class="nav-cta" href="/#contact">Contact</a>
+          </nav>
+        </div>
+      </header>
+      <main id="main">
+        <slot />
+      </main>
+      <footer class="shell site-footer">
+        <span>© {new Date().getFullYear()} {profile.name}</span>
+        <span class="status-ok">Built carefully. Running normally.</span>
+        <a href="#main">Back to top</a>
+      </footer>
+    </div>
+  </body>
+</html>

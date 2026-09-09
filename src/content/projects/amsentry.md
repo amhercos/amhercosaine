@@ -1,7 +1,7 @@
 ---
 title: AMSentry
 type: Hardware-to-cloud attendance
-summary: A Clean Architecture backend and C# middleware bridge that synchronized ZKTeco fingerprint devices with a central attendance platform.
+summary: A Clean Architecture API plus a C# WinForms bridge that turned ZKTeco fingerprint punches into durable attendance records.
 featured: false
 order: 3
 stack:
@@ -15,8 +15,8 @@ highlights:
   - Real-time biometric sync
   - High-frequency attendance logs
   - 99.9% sync accuracy
-challenge: Connect physical fingerprint scanners across remote stations to cloud business logic without losing logs, duplicating punches, or blocking high-frequency writes.
-solution: Built AMSentry on Clean Architecture and CQRS, then added a WinForms middleware bridge that talked to ZKTeco devices and pushed attendance events into a central database.
+challenge: Connect remote fingerprint scanners to cloud business logic without dropping punches, duplicating them, or stalling under burst writes.
+solution: Clean Architecture and CQRS on the API; a WinForms middleware host that owns the ZKTeco SDK and forwards normalized events to the system of record.
 role: Backend developer intern
 period: Jun 2025 — Mar 2026
 repo: https://github.com/amhercos/csharp-fingerprint-bridge
@@ -24,19 +24,19 @@ confidential: false
 ---
 
 ## Context
-AMSentry sits at the boundary between campus operations and software. Fingerprint devices had to feed a central attendance system used by the college, which meant hardware events had to become durable, queryable records.
+AMSentry records attendance from ZKTeco fingerprint scanners at remote stations. Each punch must become a durable record in the central API so payroll and campus operations can rely on it.
 
 ## Constraint
-Biometric stations are noisy, remote, and impatient. Logs arrive in bursts. A missed punch is a payroll and policy problem, not just a retry queue. The API also had to stay responsive under high-frequency writes.
+Devices are remote and send logs in bursts. A missed punch is a payroll problem. The vendor SDK requires a Windows process. Scanner libraries cannot leak into domain rules.
 
 ## Architecture
-The cloud side follows Clean Architecture with CQRS/MediatR so ingestion, querying, and administrative use cases stay separated. The local side is a C# WinForms middleware process that owns the ZKTeco SDK conversation, then forwards normalized attendance events to the backend.
+Two processes share the work. On the station, a WinForms bridge talks to the ZKTeco SDK, normalizes the event, and POSTs it to the API. If the network fails, punches wait in a local JSON queue. In the cloud, a Clean Architecture API splits ingest commands, attendance queries, and admin use cases through MediatR so reporting does not block writes. Fingerprint templates sync over Npgsql, not through the ingest controller. The domain never imports the scanner SDK.
 
 ## Implementation
-I built the sync engine that processed attendance logs from multiple stations and designed API paths that could absorb high-frequency writes. The middleware is the hardware adapter; the API is the system of record. That split kept SDK details out of the domain model.
+The sync engine posts a normalized punch with a 5-second timeout. HTTP 4xx (invalid payload) is not retried. Timeouts and 5xx are written to `offline_queue.json` beside the executable and flushed when the connection returns. That split keeps vendor DLLs on the station and business rules in the API.
 
 ## Outcome
-The sync engine processed thousands of attendance logs with 99.9% accuracy across remote hardware stations. The AMSentry backend improved API response times by 30% for high-frequency logs, based on the original project notes.
+Thousands of remote punches synced at 99.9% accuracy, from the original project notes. High-frequency ingest improved API response times by about 30%.
 
 ## Trade-offs
-A WinForms bridge is not fashionable, but it was the practical host for the vendor SDK on station machines. A fully cloud-connected device fleet would have been cleaner; the middleware made the current hardware usable without waiting for that world.
+WinForms was required because the vendor SDK expects a Windows host. A fully cloud-native device fleet would be simpler to operate, but it was not available for this hardware.

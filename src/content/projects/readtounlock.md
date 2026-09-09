@@ -1,7 +1,7 @@
 ---
 title: ReadToUnlock
 type: Gamified education product
-summary: A React reading-comprehension tool that unlocks the next piece of content only after a student completes the current milestone.
+summary: A React reading product that unlocks the next milestone only after the current one is complete. There is no skip path.
 featured: false
 order: 4
 stack:
@@ -13,8 +13,8 @@ highlights:
   - Progress-gated unlocks
   - Milestone-based engagement
   - Product-shaped frontend work
-challenge: Keep students moving through assigned reading without turning the product into a content dump they can skip.
-solution: Built a React experience whose unlock mechanism grants the next activity only when progress rules are satisfied, using milestones as the pacing primitive.
+challenge: Keep students in assigned reading without allowing them to skip ahead through all content.
+solution: A React experience whose unlock gate grants the next activity only when progress rules are satisfied. Milestones are the pacing primitive.
 role: Freelance developer
 period: Jul 2025 — Aug 2025
 repo: https://github.com/amhercos/Svci-WebEduc
@@ -22,19 +22,19 @@ confidential: false
 ---
 
 ## Context
-ReadToUnlock is a reading-comprehension product for students. The educational goal was simple: participation should be earned, not assumed.
+ReadToUnlock is a client-side React product for assigned reading. A student works through one word at a time. The next activity opens only after the current milestone is done.
 
 ## Constraint
-If every page is visible at once, students skip ahead. If the flow is too rigid, they stall. The unlock logic had to feel fair, understandable, and hard to bypass.
+If every screen is available at once, students skip ahead. If the lock is unclear, they stall. The gate has to be obvious and hard to bypass. This version has no backend API.
 
 ## Architecture
-This is a product-shaped frontend: React screens, progress state, and an unlock gate that sits between completed work and the next milestone. The interesting design is not the visual theme; it is the rule that content access follows demonstrated progress.
+The product is React on Vercel. `WordInput` starts a session. `WordDisplay` keeps the assigned word on screen until the student confirms they read it (`hasReadWord`). Only then does `ChestSelection` mount. After the chest, a weighted roll chooses a mini-game, chocolate, or sticker, then the flow resets to the next word. The next UI does not mount until confirmation fires, so skip is not available.
 
 ## Implementation
-I built the interactive milestone flow and the secure unlock mechanism that grants access based on user progress. The interface stays simple on purpose so the mechanic is obvious: finish the current reading task, then the next one opens.
+Empty input does not start the flow. The chest uses a 60 / 20 / 20 split: mini-game, chocolate, or sticker. Seven mini-games sit on the 60% path. The last game is stored so the next roll does not repeat it immediately. Claiming a reward or finishing a game returns to the next word.
 
 ## Outcome
-The unlock model increased participation by making progress visible and consequential. This project is the shortest case study on the site; it exists to show product judgment and frontend range around a primarily backend career.
+Progress is visible: nothing further happens until the student confirms the read. The case is short on purpose. It shows product judgment on a frontend-only scope, alongside backend-heavy work elsewhere on this site.
 
 ## Trade-offs
-A heavier backend would have made the unlock rules harder to tamper with. For the original scope, a focused React product was the right size. I would now extract the progress rules into an explicit policy module so the same mechanic could later sit behind an API.
+A server-owned policy would be harder to tamper with. For the original scope, a focused React app was the right size. A later version could move the gate behind an API without changing the student flow.

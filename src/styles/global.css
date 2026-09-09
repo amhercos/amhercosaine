@@ -1101,7 +1101,7 @@
 
   .prose {
     max-width: 42rem;
-    padding: 0.4rem 0 4rem;
+    padding: 0.4rem 0 0.2rem;
   }
 
   .prose h2 {
@@ -1154,6 +1154,10 @@
     height: auto;
     min-width: 0;
     margin-inline: auto;
+  }
+
+  .case-discuss {
+    margin: 1.35rem 0 4rem;
   }
 
   .not-found {

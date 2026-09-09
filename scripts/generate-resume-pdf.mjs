@@ -30,7 +30,7 @@ await page.pdf({
   path: outPath,
   format: 'A4',
   printBackground: true,
-  margin: { top: '16mm', right: '18mm', bottom: '18mm', left: '18mm' },
+  margin: { top: '14mm', right: '16mm', bottom: '16mm', left: '16mm' },
 });
 
 await browser.close();

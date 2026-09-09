@@ -87,7 +87,7 @@ export const resume = {
       org: 'ReadToUnlock',
       period: 'Jul 2025 — Aug 2025',
       bullets: [
-        'Shipped a React / TypeScript reading-comprehension product whose next activity unlocks only after the current milestone is complete.',
+        'Shipped a React / JavaScript reading-comprehension product whose next activity unlocks only after the current milestone is complete.',
         'Kept progress rules in the product, not the theme—so pacing is obvious to students and hard to skip.',
       ],
     },

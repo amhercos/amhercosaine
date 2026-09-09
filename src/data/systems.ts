@@ -34,20 +34,20 @@ export type ArchStudio = {
 export const systems: Record<string, ArchStudio> = {
   bizflow: {
     title: 'BizFlow · request path',
-    caption: 'The React Native POS sends commands over HTTPS. The API authenticates, MediatR runs the use case, the domain enforces rules, then PostgreSQL or SQLite commits.',
+    caption: 'The React Native POS previews promotions locally. At checkout, the authenticated API reloads products, recalculates eligible cash-sale prices, validates the sale, then commits.',
     kind: 'layers',
     path: [
-      'POS screen sends a command over HTTPS',
-      'Web API authenticates staff, does not price the cart',
-      'MediatR handler runs the sale / credit / promo use case',
-      'Domain enforces stock, credit, and tenant boundaries',
-      'Provider writes PostgreSQL (cloud) or SQLite (local)',
+      'POS previews promotion totals from the current basket',
+      'POST /api/Transactions/checkout with JWT',
+      'API reloads products and recalculates eligible cash-sale prices',
+      'Handler validates stock / payment and records the transaction',
+      'StoreId + SchemaName claims select the tenant data path',
     ],
     flows: [
       { label: 'HTTPS + JWT', detail: 'React Native and the web console use the same JSON contracts.' },
       { label: 'MediatR IRequest', detail: 'One command maps to one handler. Controllers stay thin.' },
-      { label: 'Use case → domain', detail: 'Handlers orchestrate. Invariants stay in the domain.' },
-      { label: 'Provider port', detail: 'Application code does not depend on which database is in use.' },
+      { label: 'Preview → checkout', detail: 'The client calculates a responsive preview; the checkout handler reloads catalog data and calculates the recorded sale.' },
+      { label: 'JWT → tenant data', detail: 'StoreId and SchemaName claims feed the current-user service, schema selection, and tenant filters.' },
     ],
     lanes: [
       {
@@ -61,8 +61,8 @@ export const systems: Record<string, ArchStudio> = {
             name: 'React Native POS',
             tags: ['sales', 'credits', 'stock'],
             tone: 'client',
-            detail: 'Floor client. It posts commands and renders receipts. Promotional pricing is not calculated on the device.',
-            snippet: 'POST /transactions  →  SaleReceipt',
+            detail: 'Floor client. Its promotion engine calculates bulk, bundle, and discount line totals for the basket preview before checkout.',
+            snippet: 'calculateLineTotal(item, basket)',
           },
           {
             id: 'web-ops',
@@ -85,21 +85,14 @@ export const systems: Record<string, ArchStudio> = {
             tags: ['REST', 'Clean Architecture'],
             tone: 'api',
             detail: 'Endpoints are shaped like operations—products, transactions, promotions, credits, dashboard, staff, settings—not like pages.',
-            snippet: 'MapGroup("/transactions")',
+            snippet: 'POST /api/Transactions/checkout',
           },
           {
             id: 'auth',
-            name: 'Tenant + auth',
-            tags: ['middleware', 'JWT'],
+            name: 'JWT tenant context',
+            tags: ['StoreId', 'SchemaName'],
             tone: 'api',
-            detail: 'Tenant middleware selects the store schema before a handler runs. Staff JWTs stay at the edge so a cashier cannot reach another tenant’s data.',
-          },
-          {
-            id: 'hw',
-            name: 'Hardware bridge APIs',
-            tags: ['ZKTeco', 'RFID'],
-            tone: 'device',
-            detail: 'Optional staff enrollment beside checkout. Attendance hardware is a separate bridge API, not part of the ticket command.',
+            detail: 'JWTs carry StoreId and SchemaName. CurrentUserService reads those claims; ConnectionResolver verifies the store is active and migrated before returning the PostgreSQL connection.',
           },
         ],
       },
@@ -114,7 +107,7 @@ export const systems: Record<string, ArchStudio> = {
             name: 'Sales',
             tags: ['command', 'receipt'],
             tone: 'app',
-            detail: 'Checkout is a command. The handler orchestrates pricing, stock reservation, and the receipt. The UI waits for the result.',
+            detail: 'CreateTransactionHandler reloads products, validates stock, recalculates eligible cash-sale promotion prices, computes payment totals, and commits the transaction.',
           },
           {
             id: 'inventory',
@@ -133,10 +126,10 @@ export const systems: Record<string, ArchStudio> = {
           {
             id: 'promos',
             name: 'PromotionEngine',
-            tags: ['CalculatePrice', 'bundles'],
+            tags: ['client preview', 'server checkout'],
             tone: 'app',
-            detail: 'Buy-X-for-Y and tie-up discounts are calculated here so two clients cannot disagree on a price. ValidationBehavior runs before every MediatR handler.',
-            snippet: 'CalculatePrice(ticket) → SaleReceipt',
+            detail: 'The React Native utility previews bulk, bundle, and discount pricing. The API PromotionEngine recalculates eligible cash-sale lines from persisted product and promotion data.',
+            snippet: 'IPromotionEngine.CalculateLineTotal(...)',
           },
           {
             id: 'dash',
@@ -156,9 +149,9 @@ export const systems: Record<string, ArchStudio> = {
           {
             id: 'pricing',
             name: 'Pricing rules',
-            tags: ['DDD', 'invariants'],
+            tags: ['preview', 'authoritative checkout'],
             tone: 'domain',
-            detail: 'Line-item pricing rules. Special cases still belong in the domain, not in a screen.',
+            detail: 'The client mirrors promotion calculations for immediate feedback; the checkout handler computes the prices and totals that are persisted.',
           },
           {
             id: 'health',
@@ -187,8 +180,8 @@ export const systems: Record<string, ArchStudio> = {
             name: 'PostgreSQL',
             tags: ['per-tenant schema', 'query filters'],
             tone: 'data',
-            detail: 'Cloud path. One schema per business. StoreMigrationWatchdog patches tenant schemas on demand. Global query filters enforce isolation and soft-delete.',
-            snippet: 'Search Path = tenant_{id}',
+            detail: 'Cloud path. PosDbContext uses the SchemaName claim as its default schema. StoreId query filters enforce tenant isolation and include soft-delete where supported.',
+            snippet: 'SchemaName → HasDefaultSchema(...)',
           },
           {
             id: 'sqlite',

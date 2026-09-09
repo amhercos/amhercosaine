@@ -6,7 +6,7 @@ featured: false
 order: 4
 stack:
   - React
-  - TypeScript
+  - JavaScript / JSX
   - Custom progress logic
   - Vercel
 highlights:

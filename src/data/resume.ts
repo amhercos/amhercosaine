@@ -67,8 +67,8 @@ export const resume = {
       period: 'Mar 2026 — Present',
       bullets: [
         'Designed a multi-tenant POS and inventory SaaS: ASP.NET Core API, schema-per-tenant isolation on PostgreSQL, SQLite for the local/provider path.',
-        'Owned operational domains in the application layer—products, transactions, promotions, customer credit, staff, reporting—so the React Native client does not re-implement retail rules.',
-        'Shipped inventory-health alerts (near-expiry / low-stock) and promotional pricing as use cases, not UI logic.',
+        'Kept checkout authoritative in the API: reload products, validate stock, recalculate eligible cash-sale promotions, and compute the persisted total.',
+        'Built a matching React Native promotion preview for bulk, bundle, and discount pricing so cashiers see basket savings before submission.',
         'Documented outcomes from project notes: ~40% less coupling across layers; ~20% less wastage from the alert engine.',
       ],
     },

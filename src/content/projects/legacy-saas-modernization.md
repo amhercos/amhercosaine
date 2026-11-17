@@ -1,42 +1,39 @@
 ---
-title: Legacy SaaS modernization
-type: Confidential .NET migration
-summary: An anonymized move of a living SaaS product off .NET Framework onto a .NET 10 Web API—Clean Architecture, vertical slices, validation and auth rebuilt as infrastructure.
-featured: false
-order: 2
+title: Enterprise Multi-Tenant SaaS
+type: .NET Framework → .NET 10
+summary: Modernizing a legacy .NET Framework application into a Clean Architecture .NET 10 Web API and Next.js frontend with Microsoft Entra ID SSO, RBAC, and Azure App Service delivery.
+featured: true
+order: 1
 stack:
-  - .NET 10
-  - ASP.NET Core Web API
+  - .NET 10 Web API
   - Clean Architecture
-  - Vertical slices
-  - CQRS / MediatR
-  - Repository pattern
-  - FluentValidation
+  - CQRS
+  - Next.js
+  - Microsoft Entra ID
+  - OAuth 2.0 SSO
+  - ASP.NET Core Identity
+  - SQL Server
+  - EF Core
+  - Serilog
+  - Azure DevOps
+  - Azure App Service
 highlights:
-  - Framework to .NET 10
-  - Feature-based application layer
-  - Auth, validation, and logging rebuilt
-challenge: Leave .NET Framework without freezing delivery or dragging mixed concerns into the new API.
-solution: Rebuild as a .NET 10 Web API. Migrate by feature slice—CQRS plus MediatR, FluentValidation, repository access—so each use case can move while the product stays shippable.
-role: .NET Developer
-period: Jun 2026 — Present
+  - Clean Architecture .NET 10 Web API + Next.js client
+  - Microsoft Entra ID, OAuth 2.0 SSO & RBAC
+  - IHostedService email workers & CSV/XLSX/PDF/DOCX exports
+  - Azure DevOps CI/CD releases to Azure App Service
+challenge: Modernize a legacy .NET Framework application onto .NET 10 and Next.js while keeping existing business operations running smoothly.
+solution: Build a Clean Architecture .NET 10 Web API with CQRS, Microsoft Entra ID & OAuth 2.0 SSO, RBAC, background workers, and Azure DevOps App Service pipelines.
+role: .NET Developer Consultant, Radix Systems Services Corp. (Deployed to P&A Grant Thornton)
+period: Jun 2026 – Present
 confidential: true
 ---
 
 ## Context
-Confidential engagement; employer name withheld. A production SaaS needed to leave .NET Framework for a .NET 10 Web API without stopping delivery.
-
-## Constraint
-Legacy methods mixed business rules, data access, and API shape. Existing callers still needed the same behavior. A full stop-the-world rewrite was not acceptable.
+As a .NET Developer Consultant at Radix Systems Services Corp. deployed to P&A Grant Thornton, I contribute to modernizing a multi-tenant enterprise SaaS platform from .NET Framework to a Clean Architecture .NET 10 Web API and Next.js frontend.
 
 ## Architecture
-The approach is a strangler migration. The Framework app keeps serving. Each feature moves as a vertical slice: a command or query through MediatR, validated with FluentValidation, authorized, and logged. Persistence sits behind a repository. Validation, auth, logging, and exception handling are shared infrastructure rather than copied into every endpoint.
-
-## Implementation
-Work proceeded by slice: host and architecture, then features and endpoints, models and data access, then auth, validation, and exception handling. Each migrated slice had to carry a real use case, not a placeholder handler.
-
-## Outcome
-New work lands in a slice without reopening the legacy codebase. Validation and errors have one place to live. The product continued to ship during the migration.
-
-## Trade-offs
-Feature slices are faster to land, but naming and boundaries need discipline or they drift. A full rewrite would have been slower and riskier for production. Moving one use case at a time kept the system shippable.
+- **Frontend Client:** Next.js web application consuming typed REST contracts.
+- **Edge & Identity:** ASP.NET Core gateway integrating Microsoft Entra ID, Google/Microsoft OAuth 2.0 SSO, ASP.NET Core Identity, and Role-Based Access Control (RBAC).
+- **Application Core:** .NET 10 Web API structured with Clean Architecture, CQRS, `IHostedService` scheduled email/reporting workers, and multi-format exports (CSV, XLSX, PDF, DOCX).
+- **Persistence & Delivery:** SQL Server via Entity Framework Core, structured Serilog telemetry, and automated Azure DevOps CI/CD pipelines deploying to Azure App Service.

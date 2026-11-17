@@ -1,42 +1,35 @@
 ---
-title: AMSentry
-type: Hardware-to-cloud attendance
-summary: A Clean Architecture API plus a C# WinForms bridge that turned ZKTeco fingerprint punches into durable attendance records.
+title: AMSentry Biometric Attendance
+type: Hardware-to-Cloud Platform
+summary: .NET Clean Architecture / CQRS attendance API paired with a C# WinForms biometric hardware integration bridge achieving 99.9% sync accuracy and ~30% faster write throughput.
 featured: false
 order: 3
 stack:
   - .NET
-  - ASP.NET Core
+  - ASP.NET Core Web API
   - Clean Architecture
   - CQRS / MediatR
   - C# WinForms
   - ZKTeco SDK
+  - PostgreSQL
 highlights:
-  - Real-time biometric sync
-  - High-frequency attendance logs
-  - 99.9% sync accuracy
-challenge: Connect remote fingerprint scanners to cloud business logic without dropping punches, duplicating them, or stalling under burst writes.
-solution: Clean Architecture and CQRS on the API; a WinForms middleware host that owns the ZKTeco SDK and forwards normalized events to the system of record.
-role: Backend developer intern
-period: Jun 2025 — Mar 2026
+  - 99.9% biometric log sync accuracy
+  - ~30% faster burst write throughput
+  - Isolated C# WinForms ZKTeco middleware bridge
+  - Local offline queue & automatic retry
+challenge: Synchronize high-frequency biometric punches from distributed ZKTeco hardware terminals without coupling vendor SDK dependencies to the core API domain.
+solution: Isolate the ZKTeco SDK inside a C# WinForms middleware agent with local offline queuing and retry, feeding a Clean Architecture / CQRS .NET attendance API.
+role: Backend Developer Intern
+period: Jun 2025 – Mar 2026
 repo: https://github.com/amhercos/csharp-fingerprint-bridge
 confidential: false
 ---
 
 ## Context
-AMSentry records attendance from ZKTeco fingerprint scanners at remote stations. Each punch must become a durable record in the central API so payroll and campus operations can rely on it.
-
-## Constraint
-Devices are remote and send logs in bursts. A missed punch is a payroll problem. The vendor SDK requires a Windows process. Scanner libraries cannot leak into domain rules.
+AMSentry captures biometric attendance events from distributed campus ZKTeco scanners and persists them into a central relational attendance store.
 
 ## Architecture
-Two processes share the work. On the station, a WinForms bridge talks to the ZKTeco SDK, normalizes the event, and POSTs it to the API. If the network fails, punches wait in a local JSON queue. In the cloud, a Clean Architecture API splits ingest commands, attendance queries, and admin use cases through MediatR so reporting does not block writes. Fingerprint templates sync over Npgsql, not through the ingest controller. The domain never imports the scanner SDK.
-
-## Implementation
-The sync engine posts a normalized punch with a 5-second timeout. HTTP 4xx (invalid payload) is not retried. Timeouts and 5xx are written to `offline_queue.json` beside the executable and flushed when the connection returns. That split keeps vendor DLLs on the station and business rules in the API.
-
-## Outcome
-Thousands of remote punches synced at 99.9% accuracy, from the original project notes. High-frequency ingest improved API response times by about 30%.
-
-## Trade-offs
-WinForms was required because the vendor SDK expects a Windows host. A fully cloud-native device fleet would be simpler to operate, but it was not available for this hardware.
+- **Hardware Edge:** Distributed ZKTeco biometric scanners emitting real-time attendance punches.
+- **Middleware Bridge:** C# WinForms agent hosting the hardware SDK listener with local offline queuing and automatic retry.
+- **Ingestion API:** .NET Clean Architecture / CQRS batch write pipeline achieving ~30% faster burst write throughput.
+- **Persistence:** Central relational attendance and terminal database delivering 99.9% log sync accuracy.

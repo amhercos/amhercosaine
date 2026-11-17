@@ -21,7 +21,7 @@ const {
   extraJsonLd,
 } = Astro.props;
 
-const pageTitle = title ? `${title} · ${profile.name}` : `${profile.name} · ${profile.role}`;
+const pageTitle = title ? `${title} | ${profile.name}` : `${profile.name} | ${profile.role}`;
 const pageDescription = description ?? profile.intro;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const siteUrl = Astro.site?.href ?? 'https://amhercosaine.vercel.app/';
@@ -53,7 +53,7 @@ const jsonLd = {
     {
       '@type': 'WebSite',
       '@id': websiteId,
-      name: `${profile.name} · ${profile.role}`,
+      name: `${profile.name} | ${profile.role}`,
       url: siteUrl,
       description: profile.intro,
       inLanguage: 'en',
@@ -67,7 +67,7 @@ const jsonLdScript = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -83,7 +83,7 @@ const jsonLdScript = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
     <meta property="og:site_name" content={profile.name} />
     <meta property="og:locale" content="en_PH" />
     <meta property="og:image" content={ogImage} />
-    <meta property="og:image:alt" content={`${profile.name} — ${profile.headline}`} />
+    <meta property="og:image:alt" content={`${profile.name} — ${profile.role}`} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
@@ -95,14 +95,12 @@ const jsonLdScript = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
     <ClientRouter />
     <script is:inline>
       (() => {
-        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-          document.documentElement.classList.add('motion-ready');
+        try {
+          const saved = localStorage.getItem('portfolio-theme');
+          document.documentElement.dataset.theme = saved === 'dark' ? 'dark' : 'light';
+        } catch {
+          document.documentElement.dataset.theme = 'light';
         }
-        window.setTimeout(() => {
-          if (!document.documentElement.hasAttribute('data-motion-boot')) {
-            document.documentElement.classList.add('motion-fallback');
-          }
-        }, 900);
       })();
     </script>
     <script is:inline type="application/ld+json" set:html={jsonLdScript} />
@@ -110,56 +108,101 @@ const jsonLdScript = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
   <body class:list={[isResume && 'page-resume']}>
     <a class="skip-link" href="#main">Skip to content</a>
     <div class="site-frame">
-      <div class="site-chrome" transition:persist="chrome">
-        <div class="console-bar">
-          <div class="shell">
-            <span class="status-live">{profile.availability}</span>
-            <span>Taguig, PH · Remote</span>
+      <header class="site-chrome" transition:persist="chrome">
+        <div class="route-progress" id="route-progress" aria-hidden="true"></div>
+        <div class="shell header-inner">
+          <a class="wordmark" href="/" aria-current={isHome ? 'page' : undefined}>
+            {profile.shortName}
+          </a>
+
+          <div class="header-controls">
+            <input class="nav-toggle" id="nav-toggle" type="checkbox" tabindex="-1" aria-hidden="true" />
+            <nav class="nav-links" id="site-nav" aria-label="Primary">
+              <a href="/#systems">Systems</a>
+              <a href="/#experience">Experience</a>
+              <a href="/#skills">Stack</a>
+              <a href="/#contact">Contact</a>
+            </nav>
+
+            <button
+              type="button"
+              id="theme-toggle"
+              class="theme-toggle"
+              aria-label="Switch color theme"
+              aria-pressed="false"
+            >
+              Dark
+            </button>
+
+            <label
+              class="menu-button"
+              for="nav-toggle"
+              id="nav-menu-button"
+              role="button"
+              aria-label="Toggle navigation"
+              aria-controls="site-nav"
+              aria-expanded="false"
+              tabindex="0"
+            >
+              Menu
+            </label>
           </div>
         </div>
-        <header class="site-header">
-        <div class="shell header-inner">
-          <a class="brand" href="/" aria-current={isHome ? 'page' : undefined}>
-            <img class="brand-mark" src="/favicon.svg" width="36" height="36" alt="" />
-            <span class="brand-name">{profile.shortName}</span>
-            <span class="brand-role">{profile.role}</span>
-          </a>
-          <input class="nav-toggle" id="nav-toggle" type="checkbox" tabindex="-1" aria-hidden="true" />
-          <label
-            class="menu-button"
-            for="nav-toggle"
-            id="nav-menu-button"
-            role="button"
-            aria-label="Toggle navigation"
-            aria-controls="site-nav"
-            aria-expanded="false"
-            tabindex="0"
-          >
-            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 17h16"></path></svg>
-          </label>
-          <nav class="nav-links" id="site-nav" aria-label="Primary">
-            <a href="/#work">Work</a>
-            <a href="/#approach">Approach</a>
-            <a href="/#experience">Experience</a>
-            <a href="/resume" aria-current={isResume ? 'page' : undefined}>Résumé</a>
-            <a class="nav-cta" href="/#contact">Contact</a>
-          </nav>
-        </div>
       </header>
-      </div>
-      <main id="main" tabindex="-1">
+
+      <main id="main" class="page-enter" tabindex="-1">
         <slot />
       </main>
-      <footer class="shell site-footer">
-        <span>© {new Date().getFullYear()} {profile.name}</span>
-        <span class="status-ok">Built carefully. Running normally.</span>
-        <a href="#main">Back to top</a>
+
+      <footer class="site-footer">
+        <div class="shell footer-inner">
+          <span>© {new Date().getFullYear()} {profile.name}</span>
+          <a href="/resume" aria-current={isResume ? 'page' : undefined}>Résumé</a>
+          <a href="#main">Top</a>
+        </div>
       </footer>
     </div>
+
     <script>
       const motionOk = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const sectionIds = ['work', 'approach', 'experience', 'contact'];
+      const sectionIds = ['systems', 'experience', 'skills', 'contact'];
       let ticking = false;
+
+      const applyTheme = (theme: 'light' | 'dark') => {
+        document.documentElement.dataset.theme = theme;
+        try {
+          localStorage.setItem('portfolio-theme', theme);
+        } catch {
+          // Ignore storage restrictions
+        }
+        const btn = document.getElementById('theme-toggle');
+        if (btn) {
+          const isDark = theme === 'dark';
+          btn.setAttribute('aria-pressed', String(isDark));
+          btn.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+          btn.textContent = isDark ? 'Light' : 'Dark';
+        }
+      };
+
+      const bindTheme = () => {
+        let current: 'light' | 'dark' = 'light';
+        try {
+          current = localStorage.getItem('portfolio-theme') === 'dark' ? 'dark' : 'light';
+        } catch {
+          current = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+        }
+        applyTheme(current);
+
+        const btn = document.getElementById('theme-toggle');
+        if (!(btn instanceof HTMLButtonElement)) return;
+        if (btn.dataset.bound === 'true') return;
+        btn.dataset.bound = 'true';
+
+        btn.addEventListener('click', () => {
+          const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+          applyTheme(next);
+        });
+      };
 
       const bindNav = () => {
         const toggle = document.getElementById('nav-toggle');
@@ -202,33 +245,9 @@ const jsonLdScript = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
         });
       };
 
-      const reveal = () => {
-        document.documentElement.setAttribute('data-motion-boot', '');
-        const nodes = document.querySelectorAll('[data-reveal]:not(.is-in)');
-        if (!motionOk) {
-          nodes.forEach((node) => node.classList.add('is-in'));
-          return;
-        }
-        const observer = new IntersectionObserver(
-          (entries) => {
-            for (const entry of entries) {
-              if (!entry.isIntersecting) continue;
-              entry.target.classList.add('is-in');
-              observer.unobserve(entry.target);
-            }
-          },
-          { threshold: 0, rootMargin: '0px 0px -10% 0px' },
-        );
-        nodes.forEach((node) => observer.observe(node));
-      };
-
-      const syncChrome = () => {
-        document.querySelector('.site-chrome')?.classList.toggle('is-scrolled', window.scrollY > 10);
-      };
-
       const syncNav = () => {
         const links = document.querySelectorAll('.nav-links a[href*="#"]');
-        const y = window.scrollY + 128;
+        const y = window.scrollY + 120;
         let current = '';
         for (const id of sectionIds) {
           const section = document.getElementById(id);
@@ -242,15 +261,10 @@ const jsonLdScript = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
       };
 
       const syncPageCurrent = () => {
-        const resumeLink = document.querySelector('.nav-links a[href="/resume"]');
-        if (resumeLink instanceof HTMLAnchorElement) {
-          if (location.pathname === '/resume') resumeLink.setAttribute('aria-current', 'page');
-          else resumeLink.removeAttribute('aria-current');
-        }
-        const brand = document.querySelector('.brand');
-        if (brand instanceof HTMLAnchorElement) {
-          if (location.pathname === '/') brand.setAttribute('aria-current', 'page');
-          else brand.removeAttribute('aria-current');
+        const wordmark = document.querySelector('.wordmark');
+        if (wordmark instanceof HTMLAnchorElement) {
+          if (location.pathname === '/') wordmark.setAttribute('aria-current', 'page');
+          else wordmark.removeAttribute('aria-current');
         }
 
         const toggle = document.getElementById('nav-toggle');
@@ -279,15 +293,50 @@ const jsonLdScript = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
       };
 
       const boot = () => {
+        bindTheme();
         bindNav();
-        reveal();
-        syncChrome();
         syncNav();
         syncPageCurrent();
         scrollToHash();
       };
 
-      document.addEventListener('astro:page-load', boot);
+      let progressTimer = 0;
+      const triggerRouteProgress = () => {
+        const bar = document.getElementById('route-progress');
+        if (!bar) return;
+        window.clearTimeout(progressTimer);
+        bar.classList.remove('is-active');
+        void bar.offsetWidth;
+        bar.classList.add('is-active');
+        progressTimer = window.setTimeout(() => {
+          bar.classList.remove('is-active');
+        }, 420);
+      };
+
+      document.addEventListener('astro:before-preparation', () => {
+        triggerRouteProgress();
+      });
+
+      document.addEventListener('astro:after-swap', () => {
+        let theme: 'light' | 'dark' = 'light';
+        try {
+          theme = localStorage.getItem('portfolio-theme') === 'dark' ? 'dark' : 'light';
+        } catch {
+          theme = 'light';
+        }
+        document.documentElement.dataset.theme = theme;
+
+        const main = document.getElementById('main');
+        if (main && motionOk) {
+          main.classList.remove('page-enter');
+          void main.offsetWidth;
+          main.classList.add('page-enter');
+        }
+      });
+
+      document.addEventListener('astro:page-load', () => {
+        boot();
+      });
       boot();
 
       if (!document.documentElement.hasAttribute('data-scroll-bound')) {
@@ -298,7 +347,6 @@ const jsonLdScript = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
             if (ticking) return;
             ticking = true;
             requestAnimationFrame(() => {
-              syncChrome();
               syncNav();
               ticking = false;
             });

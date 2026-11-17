@@ -2,7 +2,6 @@
 import { getCollection, render, type CollectionEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ArchitectureBoard from '../../components/ArchitectureBoard.tsx';
-import '../../styles/architecture.css';
 
 export async function getStaticPaths() {
   const projects = await getCollection('projects');
@@ -37,40 +36,75 @@ const extraJsonLd = {
   ogType="article"
   extraJsonLd={extraJsonLd}
 >
-  <article class="shell case-hero">
+  <article class="band band-white case-article">
+    <div class="shell">
+      <div class="case-nav">
+        <a class="case-back" href="/#systems">← Back to portfolio</a>
+        <p class="section-path">/work/{project.id}</p>
+      </div>
 
-    <div class="case-nav">
-      <a class="case-back" href="/#work">All work</a>
-      <p class="section-path">/work/{project.id}</p>
+      <h1 class="case-title">{project.data.title}</h1>
+      <p class="case-summary">{project.data.summary}</p>
+
+      <dl class="case-meta-grid">
+        <div>
+          <dt>Role</dt>
+          <dd>{project.data.role}</dd>
+        </div>
+        <div>
+          <dt>Period</dt>
+          <dd>{project.data.period}</dd>
+        </div>
+        <div>
+          <dt>Classification</dt>
+          <dd>{project.data.type}</dd>
+        </div>
+        {project.data.confidential && (
+          <div>
+            <dt>Visibility</dt>
+            <dd>Client details withheld</dd>
+          </div>
+        )}
+        {project.data.repo && (
+          <div>
+            <dt>Repository</dt>
+            <dd>
+              <a
+                href={project.data.repo}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`${project.data.title} repository (opens in a new tab)`}
+              >
+                View source →
+              </a>
+            </dd>
+          </div>
+        )}
+      </dl>
+
+      <p class="stack-inline case-stack-line">{project.data.stack.join(', ')}</p>
     </div>
-    <h1>{project.data.title}</h1>
-    <p class="hero-intro">{project.data.summary}</p>
-    <div class="case-meta">
-      <span><strong>Role</strong>{project.data.role}</span>
-      <span><strong>Period</strong>{project.data.period}</span>
-      <span><strong>Type</strong>{project.data.type}</span>
-      {project.data.confidential && (
-        <span><strong>Visibility</strong>Confidential · employer withheld</span>
-      )}
-      {project.data.repo && (
-        <a
-          href={project.data.repo}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label={`${project.data.title} repository (opens in a new tab)`}
-        >
-          <strong>Repository</strong>View source
-        </a>
-      )}
-    </div>
-    <div class="project-stack">
-      {project.data.stack.map((item) => <span>{item}</span>)}
-    </div>
-    <h2 class="arch-heading">System architecture</h2>
-    <ArchitectureBoard client:load slug={project.id} />
-    <div class="prose">
-      <Content />
-    </div>
-    <p class="case-discuss"><a class="text-link" href="/#contact">Discuss this build</a></p>
   </article>
+
+  <section class="band band-surface case-studio-band">
+    <div class="shell">
+      <div class="band-header">
+        <h2>Gane-Sarson Data Flow Diagram</h2>
+        <p>Simulate the data flow or select any node to inspect stack details and outcomes.</p>
+      </div>
+      <ArchitectureBoard client:load slug={project.id} />
+    </div>
+  </section>
+
+  <section class="band band-white case-prose-band">
+    <div class="shell">
+      <div class="prose">
+        <Content />
+      </div>
+
+      <p class="case-discuss">
+        <a class="plain-case-link" href="/#contact">Discuss this build →</a>
+      </p>
+    </div>
+  </section>
 </BaseLayout>

@@ -1,6 +1,4 @@
 ---
-import '@fontsource/ibm-plex-serif/latin-500.css';
-import '@fontsource/ibm-plex-serif/latin-600.css';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { resume, resumePdfFilename, resumePdfHref } from '../data/resume';
 
@@ -12,106 +10,83 @@ const linkedinLabel = resume.linkedin.replace(/^https?:\/\/(www\.)?/, '').replac
   title="Résumé"
   description={`${resume.name} — ${resume.headline}. Printable résumé and PDF download.`}
 >
-  <section class="shell resume-stage">
-    <div class="resume-toolbar">
-      <p class="section-path">Résumé</p>
-      <div class="resume-actions">
-        <a href="/resume" aria-current="page">View résumé</a>
-        <a href={resumePdfHref} download={resumePdfFilename}>Download PDF</a>
-      </div>
-    </div>
-
-    <article class="resume-sheet">
-      <header class="resume-masthead">
-        <p class="resume-kicker">Résumé</p>
-        <h1>{resume.name}</h1>
-        <p class="resume-headline">{resume.headline}</p>
-        <ul class="resume-contact">
-          <li><a href={`mailto:${resume.email}`}>{resume.email}</a></li>
-          <li><a href={resume.github} target="_blank" rel="noopener noreferrer">{githubLabel}</a></li>
-          <li>
-            <a href={resume.linkedin} target="_blank" rel="noopener noreferrer">{linkedinLabel}</a>
-          </li>
-          <li>{resume.location}</li>
-        </ul>
-      </header>
-
-      <section class="resume-block">
-        <h2>Executive summary</h2>
-        <p>{resume.summary}</p>
-      </section>
-
-      <section class="resume-block">
-        <h2>Technical core</h2>
-        <dl class="resume-skills">
-          {resume.skills.map((group) => (
-            <div>
-              <dt>{group.label}</dt>
-              <dd>{group.items.join(' · ')}</dd>
-            </div>
-          ))}
-        </dl>
-      </section>
-
-      <section class="resume-block resume-web-only">
-        <h2>Expertise</h2>
-        <ul class="resume-expertise">
-          {resume.expertise.map((item) => (
-            <li>
-              <strong>{item.title}</strong>
-              <span>{item.detail}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section class="resume-block">
-        <h2>Experience</h2>
-        <ol class="resume-roles">
-          {resume.roles.map((item) => (
-            <li>
-              <div class="resume-role-head">
-                <h3>{item.role}</h3>
-                <span>{item.period}</span>
-              </div>
-              <p class="resume-org">{item.org}</p>
-              <ul>
-                {item.bullets.map((bullet) => (
-                  <li>{bullet}</li>
-                ))}
-              </ul>
-            </li>
-          ))}
-        </ol>
-      </section>
-
-      <section class="resume-block resume-web-only">
-        <h2>Selected systems</h2>
-        <ul class="resume-systems">
-          {resume.systems.map((item) => (
-            <li>
-              <strong>{item.name}</strong>
-              <span>{item.line}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section class="resume-block resume-education">
-        <h2>Education</h2>
-        <div class="resume-role-head">
-          <h3>{resume.education.degree}</h3>
-          <span>{resume.education.period}</span>
+  <section class="band band-surface resume-stage">
+    <div class="shell">
+      <div class="resume-toolbar">
+        <a class="case-back" href="/">← Back to portfolio</a>
+        <div class="resume-actions">
+          <a href="/resume" aria-current="page">View résumé</a>
+          <a href={resumePdfHref} download={resumePdfFilename}>Download PDF</a>
         </div>
-        <p class="resume-org">{resume.education.school}</p>
-      </section>
-    </article>
+      </div>
+
+      <article class="resume-sheet">
+        <header class="resume-masthead">
+          <h1>{resume.name}</h1>
+          <p class="resume-headline">{resume.headline}</p>
+          <ul class="resume-contact">
+            <li><a href={`mailto:${resume.email}`}>{resume.email}</a></li>
+            <li><a href={resume.github} target="_blank" rel="noopener noreferrer">{githubLabel}</a></li>
+            <li>
+              <a href={resume.linkedin} target="_blank" rel="noopener noreferrer">{linkedinLabel}</a>
+            </li>
+            <li>{resume.location}</li>
+          </ul>
+        </header>
+
+        <section class="resume-block">
+          <h2>Summary</h2>
+          <p>{resume.summary}</p>
+        </section>
+
+        <section class="resume-block">
+          <h2>Technical Stack</h2>
+          <dl class="resume-skills">
+            {resume.skills.map((group) => (
+              <div>
+                <dt>{group.label}</dt>
+                <dd>{group.items.join(', ')}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+
+        <section class="resume-block">
+          <h2>Experience</h2>
+          <ol class="resume-roles">
+            {resume.roles.map((item) => (
+              <li>
+                <div class="resume-role-head">
+                  <h3>{item.role}</h3>
+                  <span>{item.period}</span>
+                </div>
+                <p class="resume-org">{item.org}</p>
+                <ul>
+                  {item.bullets.map((bullet) => (
+                    <li>{bullet}</li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        <section class="resume-block resume-education">
+          <h2>Education</h2>
+          <div class="resume-role-head">
+            <h3>{resume.education.degree}</h3>
+            <span>{resume.education.period}</span>
+          </div>
+          <p class="resume-org">{resume.education.school}</p>
+        </section>
+      </article>
+    </div>
   </section>
 </BaseLayout>
 
 <style is:global>
   .page-resume .resume-stage {
-    padding: clamp(1.6rem, 4vw, 2.8rem) 0 4.2rem;
+    padding: clamp(1.75rem, 4vw, 3rem) 0 4.5rem;
   }
 
   .resume-toolbar {
@@ -119,151 +94,101 @@ const linkedinLabel = resume.linkedin.replace(/^https?:\/\/(www\.)?/, '').replac
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 0.7rem 1.2rem;
-    margin-bottom: 1rem;
+    gap: 0.75rem 1.25rem;
+    max-width: 210mm;
+    margin: 0 auto 1.15rem;
     font-family: var(--mono);
-    font-size: 0.72rem;
-    letter-spacing: 0.04em;
-    color: var(--faint);
+    font-size: 0.78rem;
   }
 
   .resume-actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.85rem 1.15rem;
+    gap: 0.85rem 1.25rem;
   }
 
   .resume-actions a {
-    color: var(--text);
+    color: var(--ink);
     text-decoration: underline;
     text-underline-offset: 0.22em;
-    transition:
-      color 200ms var(--ease),
-      transform 200ms var(--ease);
   }
 
   .resume-actions a:hover,
-  .resume-actions a:focus-visible,
   .resume-actions a[aria-current='page'] {
-    color: var(--cyan);
-  }
-
-  .resume-actions a:hover,
-  .resume-actions a:focus-visible {
-    transform: translateY(-1px);
+    color: var(--accent);
   }
 
   .resume-sheet {
     max-width: 210mm;
     margin-inline: auto;
-    padding: clamp(1.6rem, 3.6vw, 2.15rem) clamp(1.45rem, 3.4vw, 2.1rem) 2rem;
-    background: #f4efe6;
-    color: #1b242c;
-    border: 1px solid var(--line-strong);
-    box-shadow: 0 28px 64px rgba(0, 0, 0, 0.38);
+    padding: clamp(1.5rem, 3.6vw, 2.35rem) clamp(1.25rem, 3.2vw, 2.25rem) 2.2rem;
+    background: var(--bg-white);
+    color: var(--ink-secondary);
+    border: 1px solid var(--border);
   }
 
   .resume-masthead {
-    padding-bottom: 0.85rem;
-    border-bottom: 1px solid rgba(27, 36, 44, 0.14);
-  }
-
-  .resume-kicker {
-    margin: 0 0 0.45rem;
-    font-family: var(--mono);
-    font-size: 0.68rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: #4d5c66;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-strong);
   }
 
   .resume-sheet h1 {
-    color: #11181e;
-    font-family: 'IBM Plex Serif', 'Georgia', serif;
-    font-size: clamp(1.7rem, 3.4vw, 2.15rem);
-    margin: 0 0 0.28rem;
+    color: var(--ink);
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: clamp(1.85rem, 3.6vw, 2.3rem);
+    letter-spacing: -0.03em;
+    margin: 0 0 0.25rem;
   }
 
   .resume-headline {
-    margin: 0 0 0.75rem;
-    color: #1d4f4d;
+    margin: 0 0 0.7rem;
+    font-family: var(--mono);
+    font-size: 0.8125rem;
+    color: var(--accent);
     font-weight: 500;
   }
 
   .resume-contact {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.35rem 1rem;
+    gap: 0.35rem 1.1rem;
     padding: 0;
     list-style: none;
-    font-size: 0.86rem;
-    color: #3d4a53;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--ink-muted);
   }
 
   .resume-contact a {
-    color: #145c59;
+    color: var(--ink);
     text-decoration: underline;
-    text-underline-offset: 0.16em;
     overflow-wrap: anywhere;
-  }
-
-  /* Phone tap targets only — print/PDF keep compact contact lines. */
-  @media screen and (max-width: 800px) {
-    .resume-contact {
-      gap: 0.15rem 1rem;
-    }
-
-    .resume-contact a {
-      display: inline-block;
-      box-sizing: border-box;
-      min-height: 2.75rem;
-      padding-block: 0.7rem;
-      max-width: 100%;
-      vertical-align: middle;
-    }
   }
 
   .resume-block {
     margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
   }
 
-  .resume-expertise,
-  .resume-systems {
-    display: grid;
-    gap: 0.7rem;
-    padding: 0;
-    list-style: none;
-  }
-
-  .resume-expertise li,
-  .resume-systems li {
-    display: grid;
-    gap: 0.18rem;
-  }
-
-  .resume-expertise strong,
-  .resume-systems strong {
-    color: #11181e;
-    font-weight: 600;
-  }
-
-  .resume-expertise span,
-  .resume-systems span {
-    color: #243038;
+  .resume-masthead + .resume-block {
+    border-top: 0;
+    padding-top: 0;
   }
 
   .resume-sheet h2 {
-    margin: 0 0 0.45rem;
-    color: #145c59;
+    margin: 0 0 0.55rem;
+    color: var(--ink);
     font-family: var(--mono);
-    font-size: 0.72rem;
-    font-weight: 500;
-    letter-spacing: 0.12em;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
   }
 
   .resume-sheet h3 {
-    color: #11181e;
+    color: var(--ink);
     font-size: 1rem;
     margin: 0;
   }
@@ -271,9 +196,9 @@ const linkedinLabel = resume.linkedin.replace(/^https?:\/\/(www\.)?/, '').replac
   .resume-sheet p,
   .resume-sheet li,
   .resume-sheet dd {
-    color: #243038;
-    font-size: 0.9rem;
-    line-height: 1.45;
+    color: var(--ink-secondary);
+    font-size: 0.90625rem;
+    line-height: 1.5;
   }
 
   .resume-roles {
@@ -293,57 +218,53 @@ const linkedinLabel = resume.linkedin.replace(/^https?:\/\/(www\.)?/, '').replac
 
   .resume-role-head span {
     font-family: var(--mono);
-    font-size: 0.72rem;
-    letter-spacing: 0.03em;
-    color: #4d5c66;
+    font-size: 0.75rem;
+    color: var(--ink-muted);
     font-variant-numeric: tabular-nums;
   }
 
   .resume-org {
-    margin: 0.12rem 0 0.35rem;
-    font-weight: 500;
-    color: #1b242c;
+    margin: 0.12rem 0 0.4rem;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--ink);
   }
 
   .resume-roles ul {
     display: grid;
-    gap: 0.38rem;
+    gap: 0.35rem;
     padding-left: 1.15rem;
   }
 
   .resume-skills {
     display: grid;
-    gap: 0.4rem;
+    gap: 0.45rem;
     margin: 0;
   }
 
   .resume-skills div {
     display: grid;
-    grid-template-columns: 8.2rem minmax(0, 1fr);
-    gap: 0.55rem;
+    grid-template-columns: 12.5rem minmax(0, 1fr);
+    gap: 0.4rem 1rem;
     align-items: baseline;
   }
 
   .resume-skills dt {
     font-family: var(--mono);
-    font-size: 0.68rem;
-    letter-spacing: 0.08em;
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
-    color: #4d5c66;
+    color: var(--ink-muted);
   }
 
-  .resume-education .resume-org {
-    margin-bottom: 0;
+  .resume-skills dd {
+    margin: 0;
   }
 
   @media (max-width: 640px) {
     .resume-skills div {
       grid-template-columns: 1fr;
-      gap: 0.2rem;
-    }
-
-    .resume-sheet {
-      padding: 1.35rem 1.1rem 1.6rem;
+      gap: 0.18rem;
     }
   }
 
@@ -351,8 +272,8 @@ const linkedinLabel = resume.linkedin.replace(/^https?:\/\/(www\.)?/, '').replac
     html,
     body.page-resume,
     .page-resume .site-frame {
-      background: #fff !important;
-      color: #1b242c;
+      background: #ffffff !important;
+      color: #09090b !important;
     }
 
     .page-resume .skip-link,
@@ -362,63 +283,41 @@ const linkedinLabel = resume.linkedin.replace(/^https?:\/\/(www\.)?/, '').replac
       display: none !important;
     }
 
-    .page-resume .site-frame {
-      min-height: 0;
-      border: 0;
+    .page-resume .resume-stage {
+      padding: 0 !important;
+      background: #ffffff !important;
     }
 
-    .page-resume .resume-stage {
+    .page-resume .shell {
       width: 100%;
       max-width: none;
-      padding: 0;
-      margin: 0;
     }
 
     .page-resume .resume-sheet {
       max-width: none;
-      margin: 0;
-      padding: 0;
       border: 0;
-      box-shadow: none;
-      background: #fff;
+      padding: 0;
+      background: #ffffff !important;
+    }
+
+    .page-resume .resume-sheet h1,
+    .page-resume .resume-sheet h2,
+    .page-resume .resume-sheet h3,
+    .page-resume .resume-org {
+      color: #09090b !important;
     }
 
     .page-resume .resume-headline,
-    .page-resume .resume-sheet h2,
     .page-resume .resume-contact a {
-      color: #145c59;
+      color: #1d4ed8 !important;
     }
 
-    .page-resume .resume-contact a {
-      display: inline;
-      min-height: 0;
-      padding: 0;
-      vertical-align: baseline;
-    }
-
-    .page-resume .resume-sheet h1,
-    .page-resume .resume-sheet h3,
-    .page-resume .resume-expertise strong,
-    .page-resume .resume-systems strong {
-      color: #11181e;
-    }
-
-    .page-resume .resume-web-only {
-      display: none !important;
-    }
-
-    .page-resume .resume-sheet h1,
-    .page-resume .resume-sheet h3 {
-      font-family: 'IBM Plex Serif', Georgia, serif;
-      color: #11181e;
-    }
-
-    .page-resume .resume-block {
-      margin-top: 16px;
-    }
-
-    .page-resume .resume-roles {
-      gap: 16px;
+    .page-resume .resume-sheet p,
+    .page-resume .resume-sheet li,
+    .page-resume .resume-sheet dd {
+      color: #3f3f46 !important;
+      font-size: 9.2pt;
+      line-height: 1.38;
     }
 
     .page-resume .resume-roles > li,
@@ -428,58 +327,17 @@ const linkedinLabel = resume.linkedin.replace(/^https?:\/\/(www\.)?/, '').replac
       page-break-inside: avoid;
     }
 
-    .page-resume .resume-sheet p,
-    .page-resume .resume-sheet li,
-    .page-resume .resume-sheet dd {
-      font-size: 10pt;
-      line-height: 1.4;
-    }
-
     .page-resume .resume-sheet h1 {
-      font-size: 22pt;
-      margin-bottom: 8px;
-    }
-
-    .page-resume .resume-headline {
-      font-size: 11pt;
-      margin-bottom: 8px;
-    }
-
-    .page-resume .resume-contact {
-      gap: 8px 16px;
-      font-size: 9.5pt;
-    }
-
-    .page-resume .resume-sheet h2 {
-      font-size: 9pt;
-      margin-bottom: 8px;
-      letter-spacing: 0.14em;
-    }
-
-    .page-resume .resume-roles ul {
-      gap: 6px;
+      font-size: 19pt;
     }
 
     .page-resume .resume-skills div {
-      grid-template-columns: 7.4rem minmax(0, 1fr);
-      gap: 8px;
-    }
-
-    .page-resume .motion-ready [data-reveal] {
-      opacity: 1 !important;
-      transform: none !important;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .resume-actions a {
-      transition: none;
-      transform: none;
+      grid-template-columns: 11.5rem minmax(0, 1fr);
     }
   }
 
   @page {
     size: A4;
-    margin: 14mm 16mm 16mm 16mm;
+    margin: 13mm 15mm 14mm 15mm;
   }
 </style>

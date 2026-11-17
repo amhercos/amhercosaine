@@ -1,7 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { profile } from '../data/profile';
 
-export default function CopyEmailButton() {
+type Props = {
+  variant?: 'link' | 'button';
+  label?: string;
+};
+
+export default function CopyEmailButton({ variant = 'link', label = 'Copy Email' }: Props) {
   const [copied, setCopied] = useState(false);
   const timeoutRef = useRef<number | undefined>(undefined);
 
@@ -14,31 +19,25 @@ export default function CopyEmailButton() {
       await navigator.clipboard.writeText(profile.email);
       setCopied(true);
       window.clearTimeout(timeoutRef.current);
-      timeoutRef.current = window.setTimeout(() => setCopied(false), 1800);
+      timeoutRef.current = window.setTimeout(() => setCopied(false), 2200);
     } catch {
       window.location.href = `mailto:${profile.email}`;
     }
   };
 
   return (
-    <button
-      className="button button-secondary"
-      type="button"
-      onClick={copyEmail}
-      aria-label={copied ? 'Email address copied' : `Copy email address ${profile.email}`}
-      aria-live="polite"
-    >
-      <svg className="icon" viewBox="0 0 24 24" aria-hidden="true">
-        {copied ? (
-          <path d="m5 12 4 4L19 6" />
-        ) : (
-          <>
-            <rect width="13" height="13" x="9" y="9" rx="2" />
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-          </>
-        )}
-      </svg>
-      {copied ? 'Email copied' : 'Copy email'}
-    </button>
+    <span className="copy-email-inline">
+      <button
+        className={variant === 'button' ? 'btn-solid-dark' : 'hero-text-link copy-link-btn'}
+        type="button"
+        onClick={copyEmail}
+        aria-label={copied ? 'Email copied to clipboard' : `Copy email address ${profile.email}`}
+      >
+        {copied ? 'Email Copied' : label}
+      </button>
+      <span className={copied ? 'copy-confirm is-visible' : 'copy-confirm'} role="status" aria-live="polite">
+        {copied ? profile.email : ''}
+      </span>
+    </span>
   );
 }

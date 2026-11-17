@@ -1,6 +1,5 @@
 /**
- * Rasterize public/og-image.png (1200×630) and public/apple-touch-icon.png (180×180)
- * from the Operational Clarity palette and geometric mark.
+ * Rasterize public/og-image.png (1200×630) and public/apple-touch-icon.png (180×180).
  */
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -11,10 +10,9 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const font = (pkg, file) =>
   pathToFileURL(path.join(root, 'node_modules', '@fontsource', pkg, 'files', file)).href;
 
-const sans600 = font('ibm-plex-sans', 'ibm-plex-sans-latin-600-normal.woff2');
-const sans500 = font('ibm-plex-sans', 'ibm-plex-sans-latin-500-normal.woff2');
-const sans400 = font('ibm-plex-sans', 'ibm-plex-sans-latin-400-normal.woff2');
-const mono500 = font('ibm-plex-mono', 'ibm-plex-mono-latin-500-normal.woff2');
+const sans400 = font('plus-jakarta-sans', 'plus-jakarta-sans-latin-400-normal.woff2');
+const sans700 = font('plus-jakarta-sans', 'plus-jakarta-sans-latin-700-normal.woff2');
+const mono500 = font('jetbrains-mono', 'jetbrains-mono-latin-500-normal.woff2');
 const markSvg = await readFile(path.join(root, 'public', 'favicon.svg'), 'utf8');
 
 const ogHtml = `<!doctype html>
@@ -22,86 +20,74 @@ const ogHtml = `<!doctype html>
   <head>
     <meta charset="utf-8" />
     <style>
-      @font-face { font-family: 'IBM Plex Sans'; font-weight: 400; src: url('${sans400}') format('woff2'); }
-      @font-face { font-family: 'IBM Plex Sans'; font-weight: 500; src: url('${sans500}') format('woff2'); }
-      @font-face { font-family: 'IBM Plex Sans'; font-weight: 600; src: url('${sans600}') format('woff2'); }
-      @font-face { font-family: 'IBM Plex Mono'; font-weight: 500; src: url('${mono500}') format('woff2'); }
+      @font-face { font-family: 'Plus Jakarta Sans'; font-weight: 400; src: url('${sans400}') format('woff2'); }
+      @font-face { font-family: 'Plus Jakarta Sans'; font-weight: 700; src: url('${sans700}') format('woff2'); }
+      @font-face { font-family: 'JetBrains Mono'; font-weight: 500; src: url('${mono500}') format('woff2'); }
       html, body { margin: 0; }
       .og {
         width: 1200px;
         height: 630px;
-        background: #080c11;
-        color: #f1ece2;
-        font-family: 'IBM Plex Sans', sans-serif;
+        background: #FFFFFF;
+        color: #0F172A;
+        font-family: 'Plus Jakarta Sans', sans-serif;
         position: relative;
-      }
-      .frame {
-        position: absolute;
-        inset: 36px;
-        border: 1.5px solid #73d3cf;
       }
       .copy {
         position: absolute;
-        left: 72px;
-        right: 72px;
-        top: 78px;
-        bottom: 72px;
+        left: 84px;
+        right: 84px;
+        top: 100px;
       }
-      .kicker {
+      .role {
         margin: 0;
-        font-family: 'IBM Plex Mono', ui-monospace, monospace;
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
         font-size: 18px;
         font-weight: 500;
-        letter-spacing: 0.16em;
-        text-transform: uppercase;
-        color: #f1ece2;
+        color: #1D4ED8;
       }
       h1 {
-        margin: 28px 0 22px;
-        max-width: 14.5ch;
-        font-size: 58px;
-        font-weight: 600;
-        letter-spacing: -0.03em;
-        line-height: 1.06;
-        color: #f1ece2;
+        margin: 22px 0 22px;
+        font-size: 72px;
+        font-weight: 700;
+        letter-spacing: -0.035em;
+        line-height: 1.03;
+        color: #0F172A;
       }
-      .name {
+      .thesis {
         margin: 0;
-        font-size: 28px;
-        font-weight: 500;
-        color: #73d3cf;
+        max-width: 56ch;
+        font-size: 24px;
+        line-height: 1.48;
+        color: #475569;
       }
-      .status {
+      .footer {
         position: absolute;
-        left: 72px;
-        bottom: 72px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 84px;
+        padding: 0 84px;
+        background: #0F172A;
         display: flex;
         align-items: center;
-        gap: 12px;
-        font-family: 'IBM Plex Mono', ui-monospace, monospace;
+        justify-content: space-between;
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
         font-size: 16px;
-        font-weight: 500;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        color: #f1ece2;
-      }
-      .status i {
-        width: 12px;
-        height: 12px;
-        background: #7dcf8c;
-        display: block;
+        color: #94A3B8;
       }
     </style>
   </head>
   <body>
     <div class="og">
-      <div class="frame"></div>
       <div class="copy">
-        <p class="kicker">.NET Developer</p>
-        <h1>I build .NET APIs that keep production boring.</h1>
-        <p class="name">Amher Cosaine Timpahan</p>
+        <p class="role">.NET Developer, Backend &amp; API Engineer</p>
+        <h1>Amher Cosaine Timpahan</h1>
+        <p class="thesis">Building Clean Architecture .NET 10 Web APIs, modernizing legacy .NET Framework systems, and shipping multi-tenant Azure SaaS.</p>
       </div>
-      <div class="status"><i></i>Open to opportunities</div>
+      <div class="footer">
+        <span>amhercosaine.vercel.app</span>
+        <span>Taguig, Philippines (Remote-ready)</span>
+      </div>
     </div>
   </body>
 </html>`;
@@ -111,7 +97,7 @@ const iconHtml = `<!doctype html>
   <head>
     <meta charset="utf-8" />
     <style>
-      html, body { margin: 0; background: #080c11; }
+      html, body { margin: 0; background: #FFFFFF; }
       svg { display: block; width: 180px; height: 180px; }
     </style>
   </head>

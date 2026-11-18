@@ -22,13 +22,15 @@ test('homepage renders unified light theme, zero middle-dots, and 3-column mobil
 
   // Verify Unified Light/Dark theme switching
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
-  const studioBgLight = await page.locator('#systems').evaluate((el) => getComputedStyle(el).backgroundColor);
-  expect(studioBgLight).toBe('rgb(248, 250, 252)');
+  await expect
+    .poll(async () => page.locator('#systems').evaluate((el) => getComputedStyle(el).backgroundColor))
+    .toBe('rgb(248, 250, 252)');
 
   await page.locator('#theme-toggle').click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
-  const studioBgDark = await page.locator('#systems').evaluate((el) => getComputedStyle(el).backgroundColor);
-  expect(studioBgDark).toBe('rgb(15, 23, 42)');
+  await expect
+    .poll(async () => page.locator('#systems').evaluate((el) => getComputedStyle(el).backgroundColor))
+    .toBe('rgb(15, 23, 42)');
 
   await page.locator('#theme-toggle').click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');

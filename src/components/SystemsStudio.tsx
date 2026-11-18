@@ -31,7 +31,7 @@ function computeFlowPath(
       const sy = fromPos.y + fromH / 2;
       const tx = toPos.x - 16;
       const ty = toPos.y + toH / 2;
-      const dropY = Math.max(sy, ty) + 56;
+      const dropY = Math.max(sy, ty) + 54;
       const d = `M ${sx} ${sy} C ${sx} ${dropY}, ${tx} ${dropY}, ${tx} ${ty + 4}`;
       return {
         d,
@@ -73,7 +73,7 @@ function computeFlowPath(
     const sy = fromPos.y;
     const tx = toPos.x + toPos.w / 2;
     const ty = toPos.y;
-    const railX = 326;
+    const railX = 338;
     const d = `M ${sx} ${sy} C ${railX} ${sy}, ${railX} ${ty}, ${tx + 4} ${ty}`;
     return {
       d,
@@ -108,22 +108,44 @@ function computeFlowPath(
   };
 }
 
+type FlowSpeed = 0.5 | 1 | 2;
+
+const SPEED_CONFIG: Record<
+  FlowSpeed,
+  { intervalMs: number; packetDur: string; trailBegin: string }
+> = {
+  0.5: { intervalMs: 2600, packetDur: '2.1s', trailBegin: '1.05s' },
+  1: { intervalMs: 1650, packetDur: '1.35s', trailBegin: '0.67s' },
+  2: { intervalMs: 850, packetDur: '0.72s', trailBegin: '0.36s' },
+};
+
 function GaneSarsonCanvas({
   system,
   mode,
   selectedKey,
+  speed,
   onSelectNode,
   reactId,
 }: {
   system: StudioSystem;
   mode: 'desktop' | 'mobile';
   selectedKey: string;
+  speed: FlowSpeed;
   onSelectNode: (node: DfdNode) => void;
   reactId: string;
 }) {
   const vb = mode === 'desktop' ? system.desktopViewBox : system.mobileViewBox;
   const markerIdleId = `${reactId}-${mode}-arrow-idle`;
   const markerHotId = `${reactId}-${mode}-arrow-hot`;
+  const glowGradId = `${reactId}-${mode}-active-glow`;
+  const timing = SPEED_CONFIG[speed];
+
+  const selectedNode = system.nodes.find((n) => n.key === selectedKey);
+  const selectedPos = selectedNode
+    ? mode === 'desktop'
+      ? selectedNode.desktop
+      : selectedNode.mobile
+    : null;
 
   return (
     <svg
@@ -133,6 +155,13 @@ function GaneSarsonCanvas({
       aria-label={`${system.title} Gane-Sarson Data Flow Diagram (${mode})`}
     >
       <defs>
+        {/* Soft Atmospheric Radial Spotlight Following the Active Node */}
+        <radialGradient id={glowGradId} cx="50%" cy="50%" r="50%">
+          <stop offset="0%" className="dfd-glow-stop-core" />
+          <stop offset="55%" className="dfd-glow-stop-mid" />
+          <stop offset="100%" className="dfd-glow-stop-outer" />
+        </radialGradient>
+
         <marker
           id={markerIdleId}
           viewBox="0 0 8 8"
@@ -157,7 +186,26 @@ function GaneSarsonCanvas({
         </marker>
       </defs>
 
-      {/* Data Flow Connectors */}
+      {/* Pure Atmospheric Spotlight Pool Gliding Smoothly Behind Active Node */}
+      {selectedPos && (
+        <g
+          className="dfd-spotlight-mover"
+          style={{
+            transform: `translate(${selectedPos.x}px, ${selectedPos.y}px)`,
+          }}
+        >
+          <ellipse
+            cx={0}
+            cy={0}
+            rx={selectedPos.w * 1.15}
+            ry={96}
+            fill={`url(#${glowGradId})`}
+            className="dfd-spotlight"
+          />
+        </g>
+      )}
+
+      {/* Data Flow Connectors & Dual Animated Packets */}
       {system.edges.map((edge) => {
         const fromNode = system.nodes.find((n) => n.key === edge.from);
         const toNode = system.nodes.find((n) => n.key === edge.to);
@@ -178,21 +226,40 @@ function GaneSarsonCanvas({
             />
             {isHot && (
               <>
-                <path d={d} className="dfd-edge-flow" />
-                <circle r="3.5" className="dfd-packet">
-                  <animateMotion dur="1.35s" repeatCount="indefinite" path={d} />
+                <path
+                  d={d}
+                  className="dfd-edge-flow"
+                  style={{ animationDuration: timing.packetDur }}
+                />
+                <circle r="3.6" className="dfd-packet">
+                  <animateMotion
+                    dur={timing.packetDur}
+                    repeatCount="indefinite"
+                    path={d}
+                  />
+                </circle>
+                <circle r="2.5" className="dfd-packet dfd-packet--trail">
+                  <animateMotion
+                    dur={timing.packetDur}
+                    begin={timing.trailBegin}
+                    repeatCount="indefinite"
+                    path={d}
+                  />
                 </circle>
               </>
             )}
             {displayLabel && (
-              <g>
+              <g
+                className="dfd-flow-pill-group"
+                onClick={() => onSelectNode(selectedKey === fromNode.key ? toNode : fromNode)}
+              >
                 <rect
                   x={labelX - labelW / 2}
                   y={labelY - 9}
                   width={labelW}
                   height="16"
                   rx="2"
-                  className="dfd-flow-label-bg"
+                  className={isHot ? 'dfd-flow-label-bg is-hot' : 'dfd-flow-label-bg'}
                 />
                 <text
                   x={labelX}
@@ -384,37 +451,31 @@ export default function SystemsStudio({ initialSlug, singleSystem = false }: Pro
     activeSystem.traceOrder[0] ?? activeSystem.nodes[0]?.key ?? '',
   );
   const [isPlaying, setIsPlaying] = useState<boolean>(true);
+  const [speed, setSpeed] = useState<FlowSpeed>(1);
 
   const selectedNode: DfdNode =
     activeSystem.nodes.find((n) => n.key === selectedKey) ?? activeSystem.nodes[0];
 
   useEffect(() => {
-    if (
-      typeof window !== 'undefined' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    ) {
-      setIsPlaying(false);
-    }
-  }, []);
-
-  useEffect(() => {
     if (!isPlaying) return;
     const order = activeSystem.traceOrder;
+    const intervalMs = SPEED_CONFIG[speed].intervalMs;
     const timer = window.setInterval(() => {
       setSelectedKey((prev) => {
         const idx = order.indexOf(prev);
         const nextIdx = idx < 0 || idx >= order.length - 1 ? 0 : idx + 1;
         return order[nextIdx] ?? order[0];
       });
-    }, 1700);
+    }, intervalMs);
 
     return () => window.clearInterval(timer);
-  }, [isPlaying, activeSystem]);
+  }, [isPlaying, activeSystem, speed]);
 
   const handleSystemSwitch = (idx: number) => {
     setSystemIndex(idx);
     const nextSys = studioSystems[idx] ?? studioSystems[0];
     setSelectedKey(nextSys.traceOrder[0] ?? nextSys.nodes[0]?.key ?? '');
+    setIsPlaying(true);
   };
 
   const handleSelectNode = (node: DfdNode) => {
@@ -428,6 +489,14 @@ export default function SystemsStudio({ initialSlug, singleSystem = false }: Pro
     const idx = order.indexOf(selectedKey);
     const nextIdx = idx < 0 || idx >= order.length - 1 ? 0 : idx + 1;
     setSelectedKey(order[nextIdx] ?? order[0]);
+  };
+
+  const handleStepPrev = () => {
+    setIsPlaying(false);
+    const order = activeSystem.traceOrder;
+    const idx = order.indexOf(selectedKey);
+    const prevIdx = idx <= 0 ? order.length - 1 : idx - 1;
+    setSelectedKey(order[prevIdx] ?? order[0]);
   };
 
   const handleReset = () => {
@@ -452,6 +521,9 @@ export default function SystemsStudio({ initialSlug, singleSystem = false }: Pro
       : selectedNode?.kind === 'process'
         ? `Process ${selectedNode.ref ?? ''}`
         : `Data Store ${selectedNode?.ref ?? ''}`;
+
+  const currentStepIdx = Math.max(0, activeSystem.traceOrder.indexOf(selectedKey));
+  const progressPct = ((currentStepIdx + 1) / activeSystem.traceOrder.length) * 100;
 
   return (
     <div className="studio-container" data-project-theme={activeSystem.theme}>
@@ -534,15 +606,45 @@ export default function SystemsStudio({ initialSlug, singleSystem = false }: Pro
           </ul>
         </div>
 
-        {/* Gane-Sarson Controls & Notation Legend */}
+        {/* Gane-Sarson Controls, Speed Switcher & Notation Legend */}
         <div className="trace-toolbar">
           <div className="trace-controls">
             <button
               type="button"
-              className={isPlaying ? 'trace-btn is-playing' : 'trace-btn is-primary'}
+              aria-pressed={isPlaying}
+              className={isPlaying ? 'trace-btn is-primary' : 'trace-btn'}
               onClick={() => setIsPlaying((p) => !p)}
             >
-              {isPlaying ? 'Pause Flow' : 'Simulate Request Flow'}
+              <span
+                className={isPlaying ? 'trace-live-dot is-on' : 'trace-live-dot'}
+                aria-hidden="true"
+              />
+              {isPlaying ? 'Auto-Simulate: ON' : 'Auto-Simulate: OFF'}
+            </button>
+
+            <div className="trace-speed-group" role="group" aria-label="Simulation speed">
+              {([0.5, 1, 2] as FlowSpeed[]).map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  className={speed === s ? 'trace-speed-btn is-active' : 'trace-speed-btn'}
+                  onClick={() => {
+                    setSpeed(s);
+                    setIsPlaying(true);
+                  }}
+                >
+                  {s}x
+                </button>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              className="trace-btn"
+              onClick={handleStepPrev}
+              aria-label="Previous flow step"
+            >
+              ← Prev
             </button>
             <button type="button" className="trace-btn" onClick={handleStep}>
               Step →
@@ -557,14 +659,24 @@ export default function SystemsStudio({ initialSlug, singleSystem = false }: Pro
             <span>Process (P1..Pn)</span>
             <span>Data Store (D1..Dn, open right)</span>
           </div>
+
+          {/* Sleek 2px Flow Progress Line */}
+          <div className="trace-progress-track" aria-hidden="true">
+            <div
+              className="trace-progress-fill"
+              style={{ width: `${progressPct}%` }}
+            />
+          </div>
         </div>
 
-        {/* Responsive Gane-Sarson DFD Stage */}
+        {/* Ultra-Clean High-Impact Gane-Sarson DFD Stage */}
         <div className="dfd-stage">
+          <div className="dfd-stage-dots" aria-hidden="true" />
           <GaneSarsonCanvas
             system={activeSystem}
             mode="desktop"
             selectedKey={selectedKey}
+            speed={speed}
             onSelectNode={handleSelectNode}
             reactId={reactId}
           />
@@ -572,36 +684,44 @@ export default function SystemsStudio({ initialSlug, singleSystem = false }: Pro
             system={activeSystem}
             mode="mobile"
             selectedKey={selectedKey}
+            speed={speed}
             onSelectNode={handleSelectNode}
             reactId={reactId}
           />
         </div>
 
-        {/* Node Detail Card */}
+        {/* Node Detail Card with Subtle Transition on Node Step */}
         {selectedNode && (
           <div className="studio-inspector" aria-live="polite">
-            <div className="studio-inspector-head">
-              <span className="studio-inspector-step">{kindLabel}</span>
-              <h4>{selectedNode.title.join(' ')}</h4>
-              {selectedNode.caption && (
-                <span className="studio-inspector-sub">{selectedNode.caption}</span>
-              )}
-            </div>
+            <div key={selectedNode.key} className="studio-inspector-inner">
+              <div className="studio-inspector-head">
+                <div className="studio-inspector-title-group">
+                  <span className="studio-inspector-step">{kindLabel}</span>
+                  <h4>{selectedNode.title.join(' ')}</h4>
+                  {selectedNode.caption && (
+                    <span className="studio-inspector-sub">{selectedNode.caption}</span>
+                  )}
+                </div>
+                <span className="studio-inspector-counter">
+                  0{currentStepIdx + 1} / 0{activeSystem.traceOrder.length}
+                </span>
+              </div>
 
-            <dl className="studio-inspector-grid">
-              <div className="studio-inspector-col">
-                <dt>Role</dt>
-                <dd>{selectedNode.role}</dd>
-              </div>
-              <div className="studio-inspector-col">
-                <dt>Stack</dt>
-                <dd className="studio-inspector-mono">{selectedNode.stack}</dd>
-              </div>
-              <div className="studio-inspector-col">
-                <dt>Key Outcome</dt>
-                <dd>{selectedNode.outcome}</dd>
-              </div>
-            </dl>
+              <dl className="studio-inspector-grid">
+                <div className="studio-inspector-col">
+                  <dt>Role</dt>
+                  <dd>{selectedNode.role}</dd>
+                </div>
+                <div className="studio-inspector-col">
+                  <dt>Stack</dt>
+                  <dd className="studio-inspector-mono">{selectedNode.stack}</dd>
+                </div>
+                <div className="studio-inspector-col">
+                  <dt>Key Outcome</dt>
+                  <dd>{selectedNode.outcome}</dd>
+                </div>
+              </dl>
+            </div>
           </div>
         )}
       </div>

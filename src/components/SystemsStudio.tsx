@@ -112,17 +112,46 @@ type FlowSpeed = 0.5 | 1 | 2;
 
 const SPEED_CONFIG: Record<
   FlowSpeed,
-  { intervalMs: number; packetDur: string; trailBegin: string }
+  {
+    intervalMs: number;
+    swallowMs: number;
+    arrowDelayMs: number;
+    arrowDrawMs: number;
+    headDelayMs: number;
+    packetDur: string;
+  }
 > = {
-  0.5: { intervalMs: 2600, packetDur: '2.1s', trailBegin: '1.05s' },
-  1: { intervalMs: 1650, packetDur: '1.35s', trailBegin: '0.67s' },
-  2: { intervalMs: 850, packetDur: '0.72s', trailBegin: '0.36s' },
+  0.5: {
+    intervalMs: 2400,
+    swallowMs: 840,
+    arrowDelayMs: 800,
+    arrowDrawMs: 780,
+    headDelayMs: 1460,
+    packetDur: '1.8s',
+  },
+  1: {
+    intervalMs: 1480,
+    swallowMs: 520,
+    arrowDelayMs: 490,
+    arrowDrawMs: 480,
+    headDelayMs: 890,
+    packetDur: '1.15s',
+  },
+  2: {
+    intervalMs: 820,
+    swallowMs: 280,
+    arrowDelayMs: 260,
+    arrowDrawMs: 260,
+    headDelayMs: 470,
+    packetDur: '0.68s',
+  },
 };
 
 function GaneSarsonCanvas({
   system,
   mode,
   selectedKey,
+  isAllFlowing,
   speed,
   onSelectNode,
   reactId,
@@ -130,6 +159,7 @@ function GaneSarsonCanvas({
   system: StudioSystem;
   mode: 'desktop' | 'mobile';
   selectedKey: string;
+  isAllFlowing: boolean;
   speed: FlowSpeed;
   onSelectNode: (node: DfdNode) => void;
   reactId: string;
@@ -146,13 +176,22 @@ function GaneSarsonCanvas({
       ? selectedNode.desktop
       : selectedNode.mobile
     : null;
+  const hasOutgoingEdges = system.edges.some((e) => e.from === selectedKey);
 
   return (
     <svg
-      className={`dfd-svg dfd-svg--${mode}`}
+      className={`dfd-svg dfd-svg--${mode}${isAllFlowing ? ' is-all-flowing' : ''}`}
       viewBox={`0 0 ${vb.w} ${vb.h}`}
       role="group"
       aria-label={`${system.title} Gane-Sarson Data Flow Diagram (${mode})`}
+      style={
+        {
+          '--swallow-ms': `${timing.swallowMs}ms`,
+          '--arrow-delay-ms': `${isAllFlowing ? Math.round(timing.swallowMs * 0.45) : timing.arrowDelayMs}ms`,
+          '--arrow-draw-ms': `${timing.arrowDrawMs}ms`,
+          '--head-delay-ms': `${isAllFlowing ? Math.round(timing.swallowMs * 0.45 + timing.arrowDrawMs * 0.85) : timing.headDelayMs}ms`,
+        } as React.CSSProperties
+      }
     >
       <defs>
         {/* Soft Atmospheric Radial Spotlight Following the Active Node */}
@@ -205,54 +244,62 @@ function GaneSarsonCanvas({
         </g>
       )}
 
-      {/* Data Flow Connectors & Flowing Line Draw */}
+      {/* Data Flow Connectors: Wait for Node Swallow Before Shooting Outgoing Arrow */}
       {system.edges.map((edge) => {
         const fromNode = system.nodes.find((n) => n.key === edge.from);
         const toNode = system.nodes.find((n) => n.key === edge.to);
         if (!fromNode || !toNode) return null;
 
         const { d, labelX, labelY } = computeFlowPath(fromNode, toNode, edge, mode);
-        const isHot = selectedKey === fromNode.key || selectedKey === toNode.key;
+        const isHot =
+          isAllFlowing ||
+          (hasOutgoingEdges
+            ? selectedKey === fromNode.key
+            : selectedKey === toNode.key);
         const displayLabel =
           mode === 'mobile' && edge.mobileLabel !== undefined ? edge.mobileLabel : edge.label;
         const labelW = displayLabel.length * 6.2 + 12;
 
         return (
           <g key={`${mode}-${edge.from}-${edge.to}`}>
+            {/* Base idle connector */}
             <path
               d={d}
               className="dfd-edge"
-              markerEnd={`url(#${isHot ? markerHotId : markerIdleId})`}
+              markerEnd={`url(#${markerIdleId})`}
             />
+            {/* Progressive arrow shaft that waits for node swallow (--arrow-delay-ms) before shooting */}
             <path
               d={d}
               pathLength={100}
               className={isHot ? 'dfd-edge-draw is-hot' : 'dfd-edge-draw'}
+            />
+            {/* Arrowhead that lights up as the growing shaft arrives at the target node */}
+            <path
+              d={d}
+              className={isHot ? 'dfd-edge-head is-hot' : 'dfd-edge-head'}
               markerEnd={`url(#${markerHotId})`}
             />
+            {/* Leading packet riding the tip of the growing arrow shaft */}
+            <path
+              d={d}
+              pathLength={100}
+              className={isHot ? 'dfd-edge-packet is-hot' : 'dfd-edge-packet'}
+            />
+            {/* Continuous subtle stream once connection is established */}
             <path
               d={d}
               className={isHot ? 'dfd-edge-flow is-hot' : 'dfd-edge-flow'}
               style={{ animationDuration: timing.packetDur }}
             />
-            {isHot && (
-              <>
-                <circle r="3.4" className="dfd-packet">
-                  <animateMotion
-                    dur={timing.packetDur}
-                    repeatCount="indefinite"
-                    path={d}
-                  />
-                </circle>
-                <circle r="2.3" className="dfd-packet dfd-packet--trail">
-                  <animateMotion
-                    dur={timing.packetDur}
-                    begin={timing.trailBegin}
-                    repeatCount="indefinite"
-                    path={d}
-                  />
-                </circle>
-              </>
+            {isAllFlowing && (
+              <circle r="3.1" className="dfd-packet">
+                <animateMotion
+                  dur={timing.packetDur}
+                  repeatCount="indefinite"
+                  path={d}
+                />
+              </circle>
             )}
             {displayLabel && (
               <g
@@ -287,7 +334,7 @@ function GaneSarsonCanvas({
         const h = DFD_HEIGHTS[node.kind];
         const x = pos.x - pos.w / 2;
         const y = pos.y - h / 2;
-        const isSelected = selectedKey === node.key;
+        const isSelected = isAllFlowing || selectedKey === node.key;
 
         return (
           <g
@@ -313,13 +360,33 @@ function GaneSarsonCanvas({
                   points={`${x - 4},${y + h - 4} ${x - 4},${y - 4} ${x + pos.w - 4},${y - 4}`}
                   className="dfd-entity-shadow"
                 />
+                <path
+                  d={`M ${x - 4} ${y - 4} V ${y + h - 4}`}
+                  pathLength={100}
+                  className="dfd-border-trace"
+                />
+                <path
+                  d={`M ${x - 4} ${y - 4} H ${x + pos.w - 4}`}
+                  pathLength={100}
+                  className="dfd-border-trace"
+                />
                 <rect x={x} y={y} width={pos.w} height={h} rx="0" className="dfd-shape" />
-                <rect
-                  x={x}
-                  y={y}
-                  width={pos.w}
-                  height={h}
-                  rx="0"
+                {/* Two-sided devouring border arms */}
+                <path
+                  d={
+                    mode === 'desktop'
+                      ? `M ${x} ${pos.y} V ${y} H ${x + pos.w} V ${pos.y}`
+                      : `M ${pos.x} ${y} H ${x} V ${y + h} H ${pos.x}`
+                  }
+                  pathLength={100}
+                  className="dfd-border-trace"
+                />
+                <path
+                  d={
+                    mode === 'desktop'
+                      ? `M ${x} ${pos.y} V ${y + h} H ${x + pos.w} V ${pos.y}`
+                      : `M ${pos.x} ${y} H ${x + pos.w} V ${y + h} H ${pos.x}`
+                  }
                   pathLength={100}
                   className="dfd-border-trace"
                 />
@@ -355,21 +422,36 @@ function GaneSarsonCanvas({
             {node.kind === 'process' && (
               <>
                 <rect x={x} y={y} width={pos.w} height={h} rx="10" className="dfd-shape" />
-                <rect
-                  x={x}
-                  y={y}
-                  width={pos.w}
-                  height={h}
-                  rx="10"
-                  pathLength={100}
-                  className="dfd-border-trace"
-                />
                 <line
                   x1={x}
                   y1={y + 24}
                   x2={x + pos.w}
                   y2={y + 24}
                   className="dfd-divider"
+                />
+                {/* Two-sided devouring border arms around rx=10 process box */}
+                <path
+                  d={
+                    mode === 'desktop'
+                      ? `M ${x} ${pos.y} V ${y + 10} A 10 10 0 0 1 ${x + 10} ${y} H ${x + pos.w - 10} A 10 10 0 0 1 ${x + pos.w} ${y + 10} V ${pos.y}`
+                      : `M ${pos.x} ${y} H ${x + 10} A 10 10 0 0 0 ${x} ${y + 10} V ${y + h - 10} A 10 10 0 0 0 ${x + 10} ${y + h} H ${pos.x}`
+                  }
+                  pathLength={100}
+                  className="dfd-border-trace"
+                />
+                <path
+                  d={
+                    mode === 'desktop'
+                      ? `M ${x} ${pos.y} V ${y + h - 10} A 10 10 0 0 0 ${x + 10} ${y + h} H ${x + pos.w - 10} A 10 10 0 0 0 ${x + pos.w} ${y + h - 10} V ${pos.y}`
+                      : `M ${pos.x} ${y} H ${x + pos.w - 10} A 10 10 0 0 1 ${x + pos.w} ${y + 10} V ${y + h - 10} A 10 10 0 0 1 ${x + pos.w - 10} ${y + h} H ${pos.x}`
+                  }
+                  pathLength={100}
+                  className="dfd-border-trace"
+                />
+                <path
+                  d={`M ${pos.x} ${y + 24} H ${x} M ${pos.x} ${y + 24} H ${x + pos.w}`}
+                  pathLength={100}
+                  className="dfd-border-trace dfd-border-trace--thin"
                 />
                 <text
                   x={pos.x}
@@ -412,17 +494,28 @@ function GaneSarsonCanvas({
                   d={`M ${x + pos.w} ${y} H ${x} V ${y + h} H ${x + pos.w}`}
                   className="dfd-store-border"
                 />
-                <path
-                  d={`M ${x + pos.w} ${y} H ${x} V ${y + h} H ${x + pos.w}`}
-                  pathLength={100}
-                  className="dfd-border-trace"
-                />
                 <line
                   x1={x + 34}
                   y1={y}
                   x2={x + 34}
                   y2={y + h}
                   className="dfd-divider"
+                />
+                {/* Two-sided devouring border arms for open-right Data Store */}
+                <path
+                  d={`M ${x} ${pos.y} V ${y} H ${x + pos.w}`}
+                  pathLength={100}
+                  className="dfd-border-trace"
+                />
+                <path
+                  d={`M ${x} ${pos.y} V ${y + h} H ${x + pos.w}`}
+                  pathLength={100}
+                  className="dfd-border-trace"
+                />
+                <path
+                  d={`M ${x + 34} ${pos.y} V ${y} M ${x + 34} ${pos.y} V ${y + h}`}
+                  pathLength={100}
+                  className="dfd-border-trace dfd-border-trace--thin"
                 />
                 <text
                   x={x + 17}
@@ -480,13 +573,14 @@ export default function SystemsStudio({ initialSlug, singleSystem = false }: Pro
     activeSystem.traceOrder[0] ?? activeSystem.nodes[0]?.key ?? '',
   );
   const [isPlaying, setIsPlaying] = useState<boolean>(true);
+  const [isAllFlowing, setIsAllFlowing] = useState<boolean>(false);
   const [speed, setSpeed] = useState<FlowSpeed>(1);
 
   const selectedNode: DfdNode =
     activeSystem.nodes.find((n) => n.key === selectedKey) ?? activeSystem.nodes[0];
 
   useEffect(() => {
-    if (!isPlaying) return;
+    if (!isPlaying || isAllFlowing) return;
     const order = activeSystem.traceOrder;
     const intervalMs = SPEED_CONFIG[speed].intervalMs;
     const timer = window.setInterval(() => {
@@ -498,21 +592,24 @@ export default function SystemsStudio({ initialSlug, singleSystem = false }: Pro
     }, intervalMs);
 
     return () => window.clearInterval(timer);
-  }, [isPlaying, activeSystem, speed]);
+  }, [isPlaying, isAllFlowing, activeSystem, speed]);
 
   const handleSystemSwitch = (idx: number) => {
     setSystemIndex(idx);
     const nextSys = studioSystems[idx] ?? studioSystems[0];
     setSelectedKey(nextSys.traceOrder[0] ?? nextSys.nodes[0]?.key ?? '');
+    setIsAllFlowing(false);
     setIsPlaying(true);
   };
 
   const handleSelectNode = (node: DfdNode) => {
+    setIsAllFlowing(false);
     setIsPlaying(false);
     setSelectedKey(node.key);
   };
 
   const handleStep = () => {
+    setIsAllFlowing(false);
     setIsPlaying(false);
     const order = activeSystem.traceOrder;
     const idx = order.indexOf(selectedKey);
@@ -521,6 +618,7 @@ export default function SystemsStudio({ initialSlug, singleSystem = false }: Pro
   };
 
   const handleStepPrev = () => {
+    setIsAllFlowing(false);
     setIsPlaying(false);
     const order = activeSystem.traceOrder;
     const idx = order.indexOf(selectedKey);
@@ -529,6 +627,7 @@ export default function SystemsStudio({ initialSlug, singleSystem = false }: Pro
   };
 
   const handleReset = () => {
+    setIsAllFlowing(false);
     setIsPlaying(false);
     setSelectedKey(activeSystem.traceOrder[0] ?? activeSystem.nodes[0]?.key ?? '');
   };
@@ -552,7 +651,9 @@ export default function SystemsStudio({ initialSlug, singleSystem = false }: Pro
         : `Data Store ${selectedNode?.ref ?? ''}`;
 
   const currentStepIdx = Math.max(0, activeSystem.traceOrder.indexOf(selectedKey));
-  const progressPct = ((currentStepIdx + 1) / activeSystem.traceOrder.length) * 100;
+  const progressPct = isAllFlowing
+    ? 100
+    : ((currentStepIdx + 1) / activeSystem.traceOrder.length) * 100;
 
   return (
     <div className="studio-container" data-project-theme={activeSystem.theme}>
@@ -653,15 +754,48 @@ export default function SystemsStudio({ initialSlug, singleSystem = false }: Pro
           <div className="trace-controls">
             <button
               type="button"
-              aria-pressed={isPlaying}
-              className={isPlaying ? 'trace-btn is-primary' : 'trace-btn'}
-              onClick={() => setIsPlaying((p) => !p)}
+              aria-pressed={isPlaying && !isAllFlowing}
+              className={
+                isPlaying && !isAllFlowing ? 'trace-btn is-primary' : 'trace-btn'
+              }
+              onClick={() => {
+                if (isAllFlowing) {
+                  setIsAllFlowing(false);
+                  setIsPlaying(true);
+                } else {
+                  setIsPlaying((p) => !p);
+                }
+              }}
             >
               <span
-                className={isPlaying ? 'trace-live-dot is-on' : 'trace-live-dot'}
+                className={
+                  isPlaying && !isAllFlowing ? 'trace-live-dot is-on' : 'trace-live-dot'
+                }
                 aria-hidden="true"
               />
-              {isPlaying ? 'Auto-Simulate: ON' : 'Auto-Simulate: OFF'}
+              {isPlaying && !isAllFlowing
+                ? 'Auto-Simulate: ON'
+                : 'Auto-Simulate: OFF'}
+            </button>
+
+            <button
+              type="button"
+              aria-pressed={isAllFlowing}
+              className={isAllFlowing ? 'trace-btn is-primary' : 'trace-btn'}
+              onClick={() => {
+                setIsAllFlowing((prev) => {
+                  const next = !prev;
+                  if (next) setIsPlaying(false);
+                  else setIsPlaying(true);
+                  return next;
+                });
+              }}
+            >
+              <span
+                className={isAllFlowing ? 'trace-live-dot is-on' : 'trace-live-dot'}
+                aria-hidden="true"
+              />
+              {isAllFlowing ? 'Flow All: ON' : 'Flow All'}
             </button>
 
             <div className="trace-speed-group" role="group" aria-label="Simulation speed">
@@ -672,7 +806,7 @@ export default function SystemsStudio({ initialSlug, singleSystem = false }: Pro
                   className={speed === s ? 'trace-speed-btn is-active' : 'trace-speed-btn'}
                   onClick={() => {
                     setSpeed(s);
-                    setIsPlaying(true);
+                    if (!isAllFlowing) setIsPlaying(true);
                   }}
                 >
                   {s}x
@@ -718,6 +852,7 @@ export default function SystemsStudio({ initialSlug, singleSystem = false }: Pro
             system={activeSystem}
             mode="desktop"
             selectedKey={selectedKey}
+            isAllFlowing={isAllFlowing}
             speed={speed}
             onSelectNode={handleSelectNode}
             reactId={reactId}
@@ -726,6 +861,7 @@ export default function SystemsStudio({ initialSlug, singleSystem = false }: Pro
             system={activeSystem}
             mode="mobile"
             selectedKey={selectedKey}
+            isAllFlowing={isAllFlowing}
             speed={speed}
             onSelectNode={handleSelectNode}
             reactId={reactId}

@@ -690,38 +690,36 @@ export default function SystemsStudio({ initialSlug, singleSystem = false }: Pro
           />
         </div>
 
-        {/* Node Detail Card with Subtle Transition on Node Step */}
+        {/* Node Detail Card (Locked Height, Zero Layout Bounce) */}
         {selectedNode && (
           <div className="studio-inspector" aria-live="polite">
-            <div key={selectedNode.key} className="studio-inspector-inner">
-              <div className="studio-inspector-head">
-                <div className="studio-inspector-title-group">
-                  <span className="studio-inspector-step">{kindLabel}</span>
-                  <h4>{selectedNode.title.join(' ')}</h4>
-                  {selectedNode.caption && (
-                    <span className="studio-inspector-sub">{selectedNode.caption}</span>
-                  )}
-                </div>
-                <span className="studio-inspector-counter">
-                  0{currentStepIdx + 1} / 0{activeSystem.traceOrder.length}
-                </span>
+            <div className="studio-inspector-head">
+              <div className="studio-inspector-title-group">
+                <span className="studio-inspector-step">{kindLabel}</span>
+                <h4>{selectedNode.title.join(' ')}</h4>
+                {selectedNode.caption && (
+                  <span className="studio-inspector-sub">{selectedNode.caption}</span>
+                )}
               </div>
-
-              <dl className="studio-inspector-grid">
-                <div className="studio-inspector-col">
-                  <dt>Role</dt>
-                  <dd>{selectedNode.role}</dd>
-                </div>
-                <div className="studio-inspector-col">
-                  <dt>Stack</dt>
-                  <dd className="studio-inspector-mono">{selectedNode.stack}</dd>
-                </div>
-                <div className="studio-inspector-col">
-                  <dt>Key Outcome</dt>
-                  <dd>{selectedNode.outcome}</dd>
-                </div>
-              </dl>
+              <span className="studio-inspector-counter">
+                0{currentStepIdx + 1} / 0{activeSystem.traceOrder.length}
+              </span>
             </div>
+
+            <dl className="studio-inspector-grid">
+              <div className="studio-inspector-col">
+                <dt>Role</dt>
+                <dd>{selectedNode.role}</dd>
+              </div>
+              <div className="studio-inspector-col">
+                <dt>Stack</dt>
+                <dd className="studio-inspector-mono">{selectedNode.stack}</dd>
+              </div>
+              <div className="studio-inspector-col">
+                <dt>Key Outcome</dt>
+                <dd>{selectedNode.outcome}</dd>
+              </div>
+            </dl>
           </div>
         )}
       </div>

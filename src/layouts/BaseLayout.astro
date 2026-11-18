@@ -246,6 +246,9 @@ const jsonLdScript = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
       };
 
       const syncNav = () => {
+        const chrome = document.querySelector('.site-chrome');
+        chrome?.classList.toggle('is-scrolled', window.scrollY > 10);
+
         const links = document.querySelectorAll('.nav-links a[href*="#"]');
         const y = window.scrollY + 120;
         let current = '';

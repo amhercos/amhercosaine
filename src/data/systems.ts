@@ -33,7 +33,7 @@ export type DfdEdge = {
   arc?: boolean;
 };
 
-export type ProjectTheme = 'teal' | 'blue' | 'navy';
+export type ProjectTheme = 'purple' | 'blue' | 'navy';
 
 export type StudioSystem = {
   slug: string;
@@ -68,7 +68,7 @@ export const studioSystems: StudioSystem[] = [
     ],
     stackLine:
       'C#, .NET 10, Clean Architecture, CQRS, Next.js, Microsoft Entra ID, OAuth 2.0, SQL Server, EF Core, Serilog, Azure App Service',
-    theme: 'teal',
+    theme: 'purple',
     desktopViewBox: { w: 1040, h: 280 },
     mobileViewBox: { w: 360, h: 486 },
     nodes: [

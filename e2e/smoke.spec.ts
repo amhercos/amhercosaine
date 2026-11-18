@@ -42,8 +42,8 @@ test('Gane-Sarson DFD studio switches project themes, renders open-ended data st
 
   await page.goto('/', { waitUntil: 'networkidle' });
 
-  // Project 01 starts with teal theme and open-ended D1 store
-  await expect(page.locator('.studio-container')).toHaveAttribute('data-project-theme', 'teal');
+  // Project 01 starts with purple theme and open-ended D1 store
+  await expect(page.locator('.studio-container')).toHaveAttribute('data-project-theme', 'purple');
   await expect(page.locator('.dfd-svg--desktop .dfd-store-border')).toHaveCount(1);
 
   // Switch to Project 02 (blue theme, D1 SQLite + D2 PostgreSQL open-ended stores)

@@ -1083,6 +1083,7 @@
   .dfd-flow-label-bg.is-hot {
     stroke: color-mix(in srgb, var(--proj-accent) 55%, var(--border));
     fill: var(--proj-tint);
+    transition-delay: var(--arrow-delay-ms, 490ms);
   }
 
   .dfd-edge {
@@ -1100,13 +1101,54 @@
     opacity: 0;
     pointer-events: none;
     transition:
-      stroke-dashoffset 500ms var(--ease),
-      opacity 280ms var(--ease);
+      opacity 180ms var(--ease),
+      stroke-dashoffset 0ms 180ms;
   }
 
   .dfd-edge-draw.is-hot {
     stroke-dashoffset: 0;
     opacity: 1;
+    transition:
+      stroke-dashoffset var(--arrow-draw-ms, 480ms) cubic-bezier(0.25, 0.85, 0.35, 1)
+        var(--arrow-delay-ms, 490ms),
+      opacity 120ms var(--ease) var(--arrow-delay-ms, 490ms);
+  }
+
+  .dfd-edge-head {
+    fill: none;
+    stroke: transparent;
+    stroke-width: 1.5;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 150ms var(--ease);
+  }
+
+  .dfd-edge-head.is-hot {
+    opacity: 1;
+    transition: opacity 140ms var(--ease) var(--head-delay-ms, 890ms);
+  }
+
+  .dfd-edge-packet {
+    fill: none;
+    stroke: var(--proj-pulse);
+    stroke-width: 6.2;
+    stroke-linecap: round;
+    stroke-dasharray: 0.1 120;
+    stroke-dashoffset: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      opacity 150ms var(--ease),
+      stroke-dashoffset 0ms 150ms;
+  }
+
+  .dfd-edge-packet.is-hot {
+    stroke-dashoffset: -100;
+    opacity: 1;
+    transition:
+      stroke-dashoffset var(--arrow-draw-ms, 480ms) cubic-bezier(0.25, 0.85, 0.35, 1)
+        var(--arrow-delay-ms, 490ms),
+      opacity 100ms var(--ease) var(--arrow-delay-ms, 490ms);
   }
 
   .dfd-edge-flow {
@@ -1117,19 +1159,17 @@
     opacity: 0;
     pointer-events: none;
     animation: packetFlow 1.05s linear infinite;
-    transition: opacity 380ms var(--ease);
+    transition: opacity 180ms var(--ease);
   }
 
   .dfd-edge-flow.is-hot {
     opacity: 0.85;
+    transition: opacity 240ms var(--ease) var(--head-delay-ms, 890ms);
   }
 
   .dfd-packet {
     fill: var(--proj-pulse);
-  }
-
-  .dfd-packet--trail {
-    opacity: 0.65;
+    pointer-events: none;
   }
 
   .dfd-arrow-idle {
@@ -1145,20 +1185,21 @@
     stroke: var(--border);
     stroke-width: 0.75;
     transition:
-      fill 360ms var(--ease),
-      stroke 360ms var(--ease);
+      fill 280ms var(--ease),
+      stroke 280ms var(--ease);
   }
 
   .dfd-flow-label {
     font-family: var(--mono);
     font-size: 9.5px;
     fill: var(--ink-muted);
-    transition: fill 360ms var(--ease);
+    transition: fill 280ms var(--ease);
   }
 
   .dfd-flow-label.is-hot {
     fill: var(--proj-accent);
     font-weight: 500;
+    transition-delay: var(--arrow-delay-ms, 490ms);
   }
 
   .dfd-node-group {
@@ -1209,14 +1250,20 @@
   .dfd-border-trace {
     fill: none;
     stroke: var(--proj-accent);
-    stroke-width: 2;
+    stroke-width: 2.1;
+    stroke-linecap: round;
+    stroke-linejoin: round;
     stroke-dasharray: 100;
     stroke-dashoffset: 100;
     opacity: 0;
     pointer-events: none;
     transition:
-      stroke-dashoffset 540ms var(--ease),
-      opacity 320ms var(--ease);
+      opacity 220ms var(--ease),
+      stroke-dashoffset 0ms 220ms;
+  }
+
+  .dfd-border-trace--thin {
+    stroke-width: 1.5;
   }
 
   .dfd-node-group:hover .dfd-shape,
@@ -1242,13 +1289,9 @@
   .dfd-node-group:focus-visible .dfd-border-trace {
     stroke-dashoffset: 0;
     opacity: 1;
-  }
-
-  .dfd-node-group.is-selected .dfd-entity-shadow,
-  .dfd-node-group.is-selected .dfd-divider,
-  .dfd-node-group:focus-visible .dfd-entity-shadow,
-  .dfd-node-group:focus-visible .dfd-divider {
-    stroke: var(--proj-accent);
+    transition:
+      stroke-dashoffset var(--swallow-ms, 520ms) cubic-bezier(0.25, 0.85, 0.35, 1),
+      opacity 120ms var(--ease);
   }
 
   .dfd-process-ref,
@@ -1883,31 +1926,6 @@
 
   ::view-transition-new(page-main) {
     animation: pageEnter 220ms var(--ease) both;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    html {
-      scroll-behavior: auto;
-    }
-
-    .hero-stagger,
-    .studio-panel,
-    .route-progress.is-active,
-    main#main.page-enter,
-    ::view-transition-old(page-main),
-    ::view-transition-new(page-main) {
-      animation: none !important;
-    }
-
-    .dfd-edge-flow {
-      animation: none;
-    }
-
-    *,
-    *::before,
-    *::after {
-      transition-duration: 0.001ms !important;
-    }
   }
 }
 

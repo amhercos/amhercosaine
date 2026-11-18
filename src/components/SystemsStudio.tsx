@@ -197,15 +197,15 @@ function GaneSarsonCanvas({
           <ellipse
             cx={0}
             cy={0}
-            rx={selectedPos.w * 1.15}
-            ry={96}
+            rx={selectedPos.w * 0.95}
+            ry={68}
             fill={`url(#${glowGradId})`}
             className="dfd-spotlight"
           />
         </g>
       )}
 
-      {/* Data Flow Connectors & Dual Animated Packets */}
+      {/* Data Flow Connectors & Flowing Line Draw */}
       {system.edges.map((edge) => {
         const fromNode = system.nodes.find((n) => n.key === edge.from);
         const toNode = system.nodes.find((n) => n.key === edge.to);
@@ -221,24 +221,30 @@ function GaneSarsonCanvas({
           <g key={`${mode}-${edge.from}-${edge.to}`}>
             <path
               d={d}
-              className={isHot ? 'dfd-edge is-hot' : 'dfd-edge'}
+              className="dfd-edge"
               markerEnd={`url(#${isHot ? markerHotId : markerIdleId})`}
+            />
+            <path
+              d={d}
+              pathLength={100}
+              className={isHot ? 'dfd-edge-draw is-hot' : 'dfd-edge-draw'}
+              markerEnd={`url(#${markerHotId})`}
+            />
+            <path
+              d={d}
+              className={isHot ? 'dfd-edge-flow is-hot' : 'dfd-edge-flow'}
+              style={{ animationDuration: timing.packetDur }}
             />
             {isHot && (
               <>
-                <path
-                  d={d}
-                  className="dfd-edge-flow"
-                  style={{ animationDuration: timing.packetDur }}
-                />
-                <circle r="3.6" className="dfd-packet">
+                <circle r="3.4" className="dfd-packet">
                   <animateMotion
                     dur={timing.packetDur}
                     repeatCount="indefinite"
                     path={d}
                   />
                 </circle>
-                <circle r="2.5" className="dfd-packet dfd-packet--trail">
+                <circle r="2.3" className="dfd-packet dfd-packet--trail">
                   <animateMotion
                     dur={timing.packetDur}
                     begin={timing.trailBegin}
@@ -308,6 +314,15 @@ function GaneSarsonCanvas({
                   className="dfd-entity-shadow"
                 />
                 <rect x={x} y={y} width={pos.w} height={h} rx="0" className="dfd-shape" />
+                <rect
+                  x={x}
+                  y={y}
+                  width={pos.w}
+                  height={h}
+                  rx="0"
+                  pathLength={100}
+                  className="dfd-border-trace"
+                />
                 {node.title.map((line, i) => {
                   const totalLines = node.title.length + (node.caption ? 1 : 0);
                   const startY = pos.y - ((totalLines - 1) * 14) / 2 + 4;
@@ -340,6 +355,15 @@ function GaneSarsonCanvas({
             {node.kind === 'process' && (
               <>
                 <rect x={x} y={y} width={pos.w} height={h} rx="10" className="dfd-shape" />
+                <rect
+                  x={x}
+                  y={y}
+                  width={pos.w}
+                  height={h}
+                  rx="10"
+                  pathLength={100}
+                  className="dfd-border-trace"
+                />
                 <line
                   x1={x}
                   y1={y + 24}
@@ -387,6 +411,11 @@ function GaneSarsonCanvas({
                 <path
                   d={`M ${x + pos.w} ${y} H ${x} V ${y + h} H ${x + pos.w}`}
                   className="dfd-store-border"
+                />
+                <path
+                  d={`M ${x + pos.w} ${y} H ${x} V ${y + h} H ${x + pos.w}`}
+                  pathLength={100}
+                  className="dfd-border-trace"
                 />
                 <line
                   x1={x + 34}
@@ -581,7 +610,20 @@ export default function SystemsStudio({ initialSlug, singleSystem = false }: Pro
       >
         <div className="studio-summary-head">
           <div className="studio-summary-meta">
-            <span>{activeSystem.context}</span>
+            <span>
+              {activeSystem.context.includes(' (') ? (
+                <>
+                  <span className="studio-context-brand">
+                    {activeSystem.context.slice(0, activeSystem.context.indexOf(' ('))}
+                  </span>{' '}
+                  <span className="studio-context-deploy">
+                    {activeSystem.context.slice(activeSystem.context.indexOf(' (') + 1)}
+                  </span>
+                </>
+              ) : (
+                activeSystem.context
+              )}
+            </span>
             <span>{activeSystem.period}</span>
           </div>
           <div className="studio-title-row">

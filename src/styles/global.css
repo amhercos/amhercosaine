@@ -52,11 +52,11 @@
   }
 
   /* Project-specific dynamic identities for Interactive Systems Studio */
-  [data-project-theme='teal'] {
-    --proj-accent: #0d9488;
-    --proj-pulse: #14b8a6;
-    --proj-tint: #f0fdfa;
-    --proj-border: #5eead4;
+  [data-project-theme='purple'] {
+    --proj-accent: #7e22ce;
+    --proj-pulse: #9333ea;
+    --proj-tint: #faf5ff;
+    --proj-border: #d8b4fe;
   }
 
   [data-project-theme='blue'] {
@@ -73,11 +73,11 @@
     --proj-border: #93c5fd;
   }
 
-  html[data-theme='dark'] [data-project-theme='teal'] {
-    --proj-accent: #2dd4bf;
-    --proj-pulse: #5eead4;
-    --proj-tint: #11282a;
-    --proj-border: #14b8a6;
+  html[data-theme='dark'] [data-project-theme='purple'] {
+    --proj-accent: #c4b5fd;
+    --proj-pulse: #d8b4fe;
+    --proj-tint: #1e1533;
+    --proj-border: #9333ea;
   }
 
   html[data-theme='dark'] [data-project-theme='blue'] {
@@ -650,9 +650,9 @@
       box-shadow 180ms var(--ease);
   }
 
-  .studio-tab[data-tab-theme='teal'] {
-    --tab-accent: #0d9488;
-    --tab-tint: #f0fdfa;
+  .studio-tab[data-tab-theme='purple'] {
+    --tab-accent: #7e22ce;
+    --tab-tint: #faf5ff;
   }
 
   .studio-tab[data-tab-theme='blue'] {
@@ -665,9 +665,9 @@
     --tab-tint: #eff6ff;
   }
 
-  html[data-theme='dark'] .studio-tab[data-tab-theme='teal'] {
-    --tab-accent: #2dd4bf;
-    --tab-tint: #0d2629;
+  html[data-theme='dark'] .studio-tab[data-tab-theme='purple'] {
+    --tab-accent: #c4b5fd;
+    --tab-tint: #1e1533;
   }
 
   html[data-theme='dark'] .studio-tab[data-tab-theme='blue'] {
@@ -783,6 +783,14 @@
     color: var(--proj-accent);
     font-variant-numeric: tabular-nums;
     transition: color 300ms var(--ease);
+  }
+
+  .studio-context-brand {
+    color: var(--accent);
+  }
+
+  .studio-context-deploy {
+    color: var(--proj-accent);
   }
 
   .studio-title-row {
@@ -1038,7 +1046,7 @@
 
   .dfd-spotlight-mover {
     pointer-events: none;
-    transition: transform 380ms var(--ease);
+    transition: transform 440ms var(--ease);
   }
 
   .dfd-spotlight {
@@ -1047,20 +1055,20 @@
 
   .dfd-glow-stop-core {
     stop-color: var(--proj-accent);
-    stop-opacity: 0.2;
+    stop-opacity: 0.07;
   }
 
   .dfd-glow-stop-mid {
     stop-color: var(--proj-accent);
-    stop-opacity: 0.07;
+    stop-opacity: 0.025;
   }
 
   html[data-theme='dark'] .dfd-glow-stop-core {
-    stop-opacity: 0.3;
+    stop-opacity: 0.11;
   }
 
   html[data-theme='dark'] .dfd-glow-stop-mid {
-    stop-opacity: 0.11;
+    stop-opacity: 0.04;
   }
 
   .dfd-glow-stop-outer {
@@ -1073,7 +1081,7 @@
   }
 
   .dfd-flow-label-bg.is-hot {
-    stroke: color-mix(in srgb, var(--proj-accent) 60%, var(--border));
+    stroke: color-mix(in srgb, var(--proj-accent) 55%, var(--border));
     fill: var(--proj-tint);
   }
 
@@ -1081,20 +1089,39 @@
     fill: none;
     stroke: var(--border-strong);
     stroke-width: 1.5;
-    transition: stroke 260ms var(--ease);
   }
 
-  .dfd-edge.is-hot {
+  .dfd-edge-draw {
+    fill: none;
     stroke: var(--proj-accent);
-    stroke-width: 2;
+    stroke-width: 1.9;
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      stroke-dashoffset 500ms var(--ease),
+      opacity 280ms var(--ease);
+  }
+
+  .dfd-edge-draw.is-hot {
+    stroke-dashoffset: 0;
+    opacity: 1;
   }
 
   .dfd-edge-flow {
     fill: none;
     stroke: var(--proj-pulse);
-    stroke-width: 2;
+    stroke-width: 1.9;
     stroke-dasharray: 6 6;
+    opacity: 0;
+    pointer-events: none;
     animation: packetFlow 1.05s linear infinite;
+    transition: opacity 380ms var(--ease);
+  }
+
+  .dfd-edge-flow.is-hot {
+    opacity: 0.85;
   }
 
   .dfd-packet {
@@ -1117,12 +1144,16 @@
     fill: var(--bg-elevated);
     stroke: var(--border);
     stroke-width: 0.75;
+    transition:
+      fill 360ms var(--ease),
+      stroke 360ms var(--ease);
   }
 
   .dfd-flow-label {
     font-family: var(--mono);
     font-size: 9.5px;
     fill: var(--ink-muted);
+    transition: fill 360ms var(--ease);
   }
 
   .dfd-flow-label.is-hot {
@@ -1134,7 +1165,7 @@
     cursor: pointer;
     outline: none !important;
     -webkit-tap-highlight-color: transparent;
-    transition: filter 320ms var(--ease);
+    transition: filter 380ms var(--ease);
   }
 
   .dfd-node-group:focus,
@@ -1146,36 +1177,46 @@
   .dfd-store-fill {
     fill: var(--bg-elevated);
     transition:
-      fill 320ms var(--ease),
-      stroke 320ms var(--ease),
-      stroke-width 320ms var(--ease);
+      fill 420ms var(--ease),
+      stroke 420ms var(--ease);
   }
 
   .dfd-shape {
     stroke: var(--border-strong);
-    stroke-width: 1.6;
+    stroke-width: 1.5;
   }
 
   .dfd-entity-shadow {
     fill: none;
     stroke: var(--border-strong);
-    stroke-width: 2;
-    transition: stroke 320ms var(--ease);
+    stroke-width: 1.8;
+    transition: stroke 420ms var(--ease);
   }
 
   .dfd-store-border {
     fill: none;
     stroke: var(--border-strong);
-    stroke-width: 1.75;
-    transition:
-      stroke 320ms var(--ease),
-      stroke-width 320ms var(--ease);
+    stroke-width: 1.6;
+    transition: stroke 420ms var(--ease);
   }
 
   .dfd-divider {
     stroke: var(--border-strong);
     stroke-width: 1.3;
-    transition: stroke 320ms var(--ease);
+    transition: stroke 420ms var(--ease);
+  }
+
+  .dfd-border-trace {
+    fill: none;
+    stroke: var(--proj-accent);
+    stroke-width: 2;
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      stroke-dashoffset 540ms var(--ease),
+      opacity 320ms var(--ease);
   }
 
   .dfd-node-group:hover .dfd-shape,
@@ -1187,7 +1228,7 @@
 
   .dfd-node-group.is-selected,
   .dfd-node-group:focus-visible {
-    filter: drop-shadow(0 0 8px color-mix(in srgb, var(--proj-accent) 28%, transparent));
+    filter: drop-shadow(0 1px 3px color-mix(in srgb, var(--proj-accent) 10%, transparent));
   }
 
   .dfd-node-group.is-selected .dfd-shape,
@@ -1197,12 +1238,10 @@
     fill: var(--proj-tint);
   }
 
-  .dfd-node-group.is-selected .dfd-shape,
-  .dfd-node-group.is-selected .dfd-store-border,
-  .dfd-node-group:focus-visible .dfd-shape,
-  .dfd-node-group:focus-visible .dfd-store-border {
-    stroke: var(--proj-accent);
-    stroke-width: 2.2;
+  .dfd-node-group.is-selected .dfd-border-trace,
+  .dfd-node-group:focus-visible .dfd-border-trace {
+    stroke-dashoffset: 0;
+    opacity: 1;
   }
 
   .dfd-node-group.is-selected .dfd-entity-shadow,
